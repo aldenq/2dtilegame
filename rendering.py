@@ -31,7 +31,7 @@ class BufferMatrix():
         self.bufferWidth = int((world.width * TILE_WIDTH)/width) #pixels in a buffer
         self.bufferHeight = int((world.height * TILE_HEIGHT)/height)
 
-
+        self.toBlit = []
         self.bufferTileX = int(world.width/width) #tiles in a buffer
         self.bufferTileY = int(world.height/height)
 
@@ -117,11 +117,24 @@ class BufferMatrix():
 
         brx,bry = camera.getGlobal(SCREEN_WIDTH,SCREEN_HEIGHT)
         brBufferX,brBufferY = self.getBufferPoint(brx,bry)
+        if brBufferX < 0: brBufferX = 0
+        if brBufferY < 0: brBufferX = 0
         #print((tlBufferX,tlBufferY),(brBufferX,brBufferY))
 
-        for bufferX in range(tlBufferX,brBufferX+1):
-            for bufferY in range(tlBufferY,brBufferY+1):
-                surface.blit(self.buffers[bufferX,bufferY],(bufferX*self.bufferWidth - offsetX,bufferY*self.bufferHeight-offsetY))
+        if not (camera.lastX == camera.x and camera.lastY == camera.y):
+            
+        
+            self.toBlit = []
+            for bufferX in range(tlBufferX,brBufferX+1):
+                
+                for bufferY in range(tlBufferY,brBufferY+1):
+                    self.toBlit.append((self.buffers[bufferX,bufferY],(bufferX*self.bufferWidth - offsetX,bufferY*self.bufferHeight-offsetY)))
+        surface.blits(self.toBlit)
+        camera.lastX = camera.x
+        camera.lastY = camera.y
+
+
+        
                 #self.blitBuffer(surface, bufferX,bufferY,offsetX,OffsetY)
                 
 
@@ -138,6 +151,8 @@ class Camera():
 
         self.x = x
         self.y = y
+        self.lastX = None
+        self.lastY = None
         pass
     
 

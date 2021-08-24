@@ -30,7 +30,7 @@ entityManager = entities.EntityManager(world)
 
 mytool = tools.Tool("test tool")
 
-mainPlayer = player.Player(50,50)
+mainPlayer = player.Player(1000,1000)
 mainPlayer.fly = False
 mainPlayer.collider.hasGravity = True
 
@@ -219,9 +219,9 @@ def startGame():
         
         mainPlayer.showView(screen,buffers)
         #print(time.time()-st2)
-        entityManager.drawEntities(screen,mainPlayer.camera)
+        #entityManager.drawEntities(screen,mainPlayer.camera)
         mainPlayer.applyPhysics(world)
-        entityManager.simulateEntities()
+        # entityManager.simulateEntities()
         
             
         
