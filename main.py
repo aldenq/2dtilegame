@@ -1,5 +1,6 @@
 
 import pygame
+from pygame.locals import *
 
 import math
 import time
@@ -70,7 +71,11 @@ pygame.init()
 screen_size = (SCREEN_WIDTH, SCREEN_HEIGHT)
  
 # create a window
-screen = pygame.display.set_mode(screen_size)
+flags =  DOUBLEBUF
+
+screen = pygame.display.set_mode(screen_size,flags)
+screen.set_alpha(None)
+
 pygame.display.set_caption("pygame Test")
  
 # clock is used to set a max fps
@@ -173,7 +178,7 @@ def setblocks(x,y,x1,y1,tile):
 
 
 
-#st = time.time()
+st = time.time()
 def startGame():
     global running,st
     
@@ -203,16 +208,32 @@ def startGame():
 
         world.workOnWorkloads(8,buffers)
         input()
+
+        #st2 = time.time()
+        
         mainPlayer.showView(screen,buffers)
+        #print(time.time()-st2)
         entityManager.drawEntities(screen,mainPlayer.camera)
         mainPlayer.applyPhysics(world)
         entityManager.simulateEntities()
-        #mainPlayer.collider.draw(screen,mainPlayer.camera)
+        
+            
+        
+
+            
+            #
+            
+            
+            #
+            
+            
+            #mainPlayer.collider.draw(screen,mainPlayer.camera)
         pygame.display.flip()
+        #print(time.time()-st2)
 
         
         # how many updates per second
-        clock.tick(60)
+        #clock.tick(60)
 #print(__name__ == "__main__")
 #if __name__ == "__main__":
 #startGame()

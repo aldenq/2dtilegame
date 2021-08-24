@@ -27,8 +27,38 @@ class TileManager():
 
     def __init__(self) -> None:
         self.tiles = {}
+
+        self.lastTile = None
+        lastTileName = None
         pass
     
+
+    def fastCopy(self,loc):
+        
+
+        tile = (self.tiles[loc])
+        retTile = Tile(tile.color.r,tile.color.g,tile.color.b  )
+
+
+        
+        retTile.tileName = tile.tileName
+        retTile.isSolid = tile.isSolid
+        retTile.sunlight = tile.sunlight
+        retTile.emissionlevel = tile.emissionlevel
+        retTile.translucency = tile.translucency
+        
+
+        #retTile.color.r = 
+        #retTile.color.g = 
+        #retTile.color.b = 
+
+
+        
+        retTile.colorTranslucencyR = (1 - retTile.color.r/255)*(1-retTile.translucency)
+        retTile.colorTranslucencyG = (1 - retTile.color.g/255)*(1-retTile.translucency)
+        retTile.colorTranslucencyB = (1 - retTile.color.b/255)*(1-retTile.translucency)
+        return(retTile)
+
     def __getitem__(self,loc):
         #print(loc,"getting tile")
         retTile = copy.copy(self.tiles[loc])
@@ -36,6 +66,7 @@ class TileManager():
 
         if callable(retTile.onSpawn):
             retTile.onSpawn(retTile)
+
 
 
         retTile.color.r += random.randint(-retTile.rRange,retTile.rRange )
