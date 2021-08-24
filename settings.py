@@ -1,14 +1,14 @@
 WORLD_WIDTH = 1000
 WORLD_HEIGHT = 1000
 
-BUFFER_WIDTH = 10     #amount of tiles in a buffer
-BUFFER_HEIGHT = 10
+BUFFER_WIDTH = 20     #amount of tiles in a buffer
+BUFFER_HEIGHT = 20
 
 TILE_WIDTH = 5
 TILE_HEIGHT = 5
 
 SCREEN_WIDTH = 1000
-SCREEN_HEIGHT = 1000
+SCREEN_HEIGHT = 600
 
 
 

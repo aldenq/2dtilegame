@@ -97,6 +97,9 @@ class BufferMatrix():
     def getBuffer(self,x,y): #returns what buffer a tile belongs to
         return((int(x/self.bufferTileX), int(y/self.bufferTileY)))
 
+    def getBufferPoint(self,x,y):
+        return((int(x/self.bufferWidth),int(y/self.bufferHeight)))
+
     def drawBuffers(self):
         for bufferX in range(self.width):
             for bufferY in range(self.height):
@@ -105,10 +108,21 @@ class BufferMatrix():
     def blitBuffer(self,surface,bufferX,bufferY,offsetX,offsetY):
         surface.blit(self.buffers[bufferX,bufferY],(bufferX*self.bufferWidth - offsetX,bufferY*self.bufferHeight-offsetY))
 
-    def blitBuffers(self,surface,offsetX,OffsetY):
-        for bufferX in range(self.width):
-            for bufferY in range(self.height):
-                self.blitBuffer(surface, bufferX,bufferY,offsetX,OffsetY)
+    def blitBuffers(self,surface,camera):
+        offsetX = camera.x
+        offsetY = camera.y
+        tlx,tly = camera.getGlobal(0,0)
+        tlBufferX,tlBufferY = self.getBufferPoint(tlx,tly)
+
+
+        brx,bry = camera.getGlobal(SCREEN_WIDTH,SCREEN_HEIGHT)
+        brBufferX,brBufferY = self.getBufferPoint(brx,bry)
+        #print((tlBufferX,tlBufferY),(brBufferX,brBufferY))
+
+        for bufferX in range(tlBufferX,brBufferX+1):
+            for bufferY in range(tlBufferY,brBufferY+1):
+                surface.blit(self.buffers[bufferX,bufferY],(bufferX*self.bufferWidth - offsetX,bufferY*self.bufferHeight-offsetY))
+                #self.blitBuffer(surface, bufferX,bufferY,offsetX,OffsetY)
                 
 
 
@@ -133,5 +147,5 @@ class Camera():
         return(x-self.x, y-self.y)
 
     def draw(self,surface,buffers):
-        buffers.blitBuffers(surface,self.x,self.y)
+        buffers.blitBuffers(surface,self)
 

@@ -179,23 +179,29 @@ def setblocks(x,y,x1,y1,tile):
 
 
 st = time.time()
+ast = time.time()
+frame = 0
 def startGame():
-    global running,st
+    global running,st,frame
     
     #print("starting")
     while running:
+        frame += 1
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
                 pygame.quit()
         
         #clear the screen
-        screen.fill((100,100,200))
+        #screen.fill((100,100,200))
 
 
 
         #print(1/(time.time()-st))
         #st = time.time()
+
+        print(frame/(time.time() - ast), 1/(time.time()-st)  )
+        st = time.time()
         #print(pygame.mouse.get_pos())
         #screen.blit(buffers.buffers[0,0],(0,0))
         mx,my = pygame.mouse.get_pos()
