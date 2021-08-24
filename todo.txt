@@ -1,0 +1,31 @@
+engine:
+
+
+    general:
+        add ability to get angle/slope between two tiles/points
+
+    inventory:
+        add inventory and ability to switch between items
+
+    entities:
+        add in ability to spawn clone of entity
+        add entity manager
+
+    world:
+        make lighting data distinct from tiles
+        structure generation
+
+    lighting:
+        allow for region to be re ray-traced if a tile is updated
+        update sunlight when blocks are broken or added
+        add RGB lighting
+        blocks let different amounts of light of differing colors through depending on their color
+
+
+        
+    
+
+
+
+
+        
