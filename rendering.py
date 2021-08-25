@@ -53,6 +53,11 @@ class BufferMatrix():
         buffer = self.buffers[x,y]
         
         #buffer.fill((255,0,255))
+
+
+
+        lighting = pygame.Surface((TILE_WIDTH,TILE_HEIGHT))
+        lighting.set_alpha(50)
         for localX in range(self.bufferTileX):
             for localY in range(self.bufferTileY):
                 globalX = localX+offsetX
@@ -64,14 +69,22 @@ class BufferMatrix():
 
 
 
-                red = tile.tile.color.r * (tile.tile.sunlight + tile.lighting.lighting.r)
+                red = int(tile.tile.color.r * (tile.tile.sunlight + tile.lighting.lighting.r))
                 if red > 255: red = 255
-                green = tile.tile.color.g * (tile.tile.sunlight + tile.lighting.lighting.g)
+                green = int(tile.tile.color.g * (tile.tile.sunlight + tile.lighting.lighting.g))
                 if green > 255: green = 255
-                blue = tile.tile.color.b *(tile.tile.sunlight + tile.lighting.lighting.b)
+                blue = int(tile.tile.color.b *(tile.tile.sunlight + tile.lighting.lighting.b))
                 if blue>255: blue = 255
                 #print(red,green,blue, tile.color,globalX,globalY)
-                pygame.draw.rect(buffer,(red,green,blue),(localX*TILE_WIDTH,localY * TILE_HEIGHT,TILE_WIDTH,TILE_HEIGHT))
+
+
+                if tile.tile.image == None:
+                    pygame.draw.rect(buffer,(red,green,blue),(localX*TILE_WIDTH,localY * TILE_HEIGHT,TILE_WIDTH,TILE_HEIGHT))
+                else:
+                    lighting.fill((red*2 if red*3 < 255 else 255 ,green*3 if green*3 < 255 else 255,blue*3 if blue*3 < 255 else 255))
+                    buffer.blit(tile.tile.image, (localX*TILE_WIDTH,localY * TILE_HEIGHT))
+                    buffer.blit(lighting, (localX*TILE_WIDTH,localY * TILE_HEIGHT))
+                    #pygame.draw.rect(buffer,(red,green,blue,1),(localX*TILE_WIDTH,localY * TILE_HEIGHT,TILE_WIDTH,TILE_HEIGHT))
 
 
     def updateTile(self,x,y):

@@ -145,7 +145,7 @@ class ray():
     
     
 class lightingWorkload():
-    
+
     def __init__(self,x,y,level,count,world):
         self.x = x
         self.y = y
@@ -218,7 +218,7 @@ class World():
                         #print("aaaa",cellTile,self.world[x,y-1].tile.tileName)
                         cell.tile = tiles.tileManager.fastCopy("dirt")
                         
-                        cell.tile.sunlight = self.world[x,y-1].tile.sunlight *.9
+                        cell.tile.sunlight = self.world[x,y-1].tile.sunlight *.7
 
 
                     else:
@@ -237,7 +237,7 @@ class World():
                             
                         else:
                             cell.tile = tiles.tileManager.fastCopy("dirt")
-                            cell.tile.sunlight = self.world[x,y-1].tile.sunlight *.9
+                            cell.tile.sunlight = self.world[x,y-1].tile.sunlight *.7
                             
 
 

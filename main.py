@@ -25,7 +25,7 @@ screen_size = (SCREEN_WIDTH*SCALE, SCREEN_HEIGHT*SCALE)
 flags =   DOUBLEBUF
 
 screen = pygame.display.set_mode(screen_size,flags)
-screen.set_alpha(None)
+#screen.set_alpha(None)
 print("loading in content packs")
 
 
@@ -276,11 +276,11 @@ def startGame():
 
 
 
-        # #print(1/(time.time()-st))
+         #print(1/(time.time()-st))
         # #st = time.time()
 
-        # print(frame/(time.time() - ast), 1/(time.time()-st)  )
-        # st = time.time()
+        print(frame/(time.time() - ast), 1/(time.time()-st)  )
+        st = time.time()
         # #print(pygame.mouse.get_pos())
         # #screen.blit(buffers.buffers[0,0],(0,0))
         # mx,my = pygame.mouse.get_pos()
@@ -318,7 +318,7 @@ def startGame():
 
         
         
-        clock.tick(MAX_FPS)
+        #clock.tick(MAX_FPS)
 #print(__name__ == "__main__")
 if __name__ == "__main__":
     startGame()

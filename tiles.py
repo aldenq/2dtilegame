@@ -1,5 +1,6 @@
 import copy
-import random
+import random,pygame
+from settings import MAX_DARK
 from helpers import *
 class Tile():
     def __init__(self,r,g,b) -> None:
@@ -16,10 +17,16 @@ class Tile():
         self.emissionlevel = 0
         self.translucency = .4
         self.colorTranslucency = None
-
+        self.image = None
         self.onSpawn = None 
         self.lightSources = None
         pass
+    def darkenImage(self):
+        dark = pygame.Surface(self.image.get_size())
+        dark.set_alpha(MAX_DARK)
+        dark.fill((0, 0, 0))
+        self.image.blit(dark, (0, 0))
+
     def __repr__(self) -> str:
         return(str(self.tileID))
 
@@ -40,7 +47,7 @@ class TileManager():
         retTile = Tile(tile.color.r,tile.color.g,tile.color.b  )
 
 
-        
+        retTile.image = tile.image
         retTile.tileName = tile.tileName
         retTile.isSolid = tile.isSolid
         retTile.sunlight = tile.sunlight
@@ -103,6 +110,8 @@ air.translucency = .1
 air.rRange = 0
 air.bRange = 0
 air.gRange = 0
+air.image = pygame.image.load("assets/sky.png")
+air.darkenImage()
 tileManager["air"] = air
 
 
@@ -112,6 +121,8 @@ dirt.tileID = 1
 dirt.rRange = 5
 dirt.bRange = 5
 dirt.translucency = .6
+dirt.image = pygame.image.load("assets/dirt.png")
+dirt.darkenImage()
 tileManager["dirt"] = dirt
 
 
@@ -121,6 +132,9 @@ dirtBackground.tileID = 0
 dirtBackground.rRange = 5
 dirtBackground.bRange = 5
 dirtBackground.translucency = .97
+
+dirtBackground.image = pygame.image.load("assets/dirtbackground.png")
+dirtBackground.darkenImage()
 tileManager["dirtBackground"] = dirtBackground
 
 
