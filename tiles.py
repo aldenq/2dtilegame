@@ -110,7 +110,7 @@ air.translucency = .1
 air.rRange = 0
 air.bRange = 0
 air.gRange = 0
-air.image = pygame.image.load("assets/sky.png")
+air.image = pygame.image.load("assets/sky.bmp")
 air.darkenImage()
 tileManager["air"] = air
 
@@ -121,7 +121,7 @@ dirt.tileID = 1
 dirt.rRange = 5
 dirt.bRange = 5
 dirt.translucency = .6
-dirt.image = pygame.image.load("assets/dirt.png")
+dirt.image = pygame.image.load("assets/dirt.bmp")
 dirt.darkenImage()
 tileManager["dirt"] = dirt
 
@@ -133,7 +133,7 @@ dirtBackground.rRange = 5
 dirtBackground.bRange = 5
 dirtBackground.translucency = .97
 
-dirtBackground.image = pygame.image.load("assets/dirtbackground.png")
+dirtBackground.image = pygame.image.load("assets/dirtbackground.bmp")
 dirtBackground.darkenImage()
 tileManager["dirtBackground"] = dirtBackground
 

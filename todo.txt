@@ -3,6 +3,7 @@ engine:
 
     general:
         add ability to get angle/slope between two tiles/points
+        a bunch of things could in theory be threaded, thread them.
 
     inventory:
         add inventory and ability to switch between items
@@ -20,6 +21,9 @@ engine:
         update sunlight when blocks are broken or added
         add RGB lighting
         blocks let different amounts of light of differing colors through depending on their color
+
+
+    
 
 
         
