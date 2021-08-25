@@ -7,6 +7,11 @@ import tiles
 import math
 import copy
 class lightingData():
+    """
+    
+    one of the elements that composes a Cell. Stores information about how that cell is lit. 
+    Does not change when a tile is updated
+    """
     def __init__(self) -> None:
         self.lighting = Color(0,0,0)
         self.passthroughs = []
@@ -14,7 +19,10 @@ class lightingData():
 
 
 class Cell():
-
+    """
+    used to store all information relating to tiles
+    
+    """
     def __init__(self) -> None:
         self.lighting = lightingData()
         self.tile = None
@@ -25,6 +33,10 @@ class Cell():
 
 
 class ray():
+    """
+    creates a ray that can be used to calculate volumetrics and lighting
+    
+    """
     speed = TILE_WIDTH/4
     def __init__(self,originX,originY,angle,intensity,r,g,b,world) -> None:
         self.color = (Color(r,g,b)/255)*intensity
@@ -133,7 +145,7 @@ class ray():
     
     
 class lightingWorkload():
-
+    
     def __init__(self,x,y,level,count,world):
         self.x = x
         self.y = y

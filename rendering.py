@@ -117,6 +117,8 @@ class BufferMatrix():
 
         brx,bry = camera.getGlobal(SCREEN_WIDTH,SCREEN_HEIGHT)
         brBufferX,brBufferY = self.getBufferPoint(brx,bry)
+        
+        
         if brBufferX < 0: brBufferX = 0
         if brBufferY < 0: brBufferX = 0
         #print((tlBufferX,tlBufferY),(brBufferX,brBufferY))

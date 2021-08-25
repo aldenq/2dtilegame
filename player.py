@@ -1,3 +1,5 @@
+from helpers import Matrix
+import copy
 from settings import *
 import physics,rendering,pygame
 class Player():
@@ -18,6 +20,9 @@ class Player():
         self.collider = physics.Collider(x,y,self.width,self.height)
         self.collider.canClimb = True
         self.collider.hasGravity = True
+
+
+        self.inventory = Inventory()
         self.tool = None
         self.AI = None
         self.fly = False
@@ -57,7 +62,69 @@ class Player():
         self.camera.draw(surface,buffers)
         self.draw(surface)
 
+    
+    def selectTool(self,x,y):
+        self.tool = self.inventory[x,y]
 
+
+
+
+
+
+class Inventory:
+
+    """
+    
+    used to store information about the players inventory
+    
+    """
+
+
+    def __init__(self) -> None:
+        self.items = Matrix(INVENTORY_WIDTH,INVENTORY_HEIGHT)
+        pass
+    
+
+    def __get__(self,loc):
+        return(self.items[loc])
+
+
+    def __set__(self,loc,item):
+        self.items[loc] = item
+    
+
+
+    def giveItem(self,item):
+        for x in range(INVENTORY_WIDTH):
+            for y in range(INVENTORY_HEIGHT):
+                if self.items[x,y] == None:
+                    self.items[x,y] = copy.copy(item)
+    
+    
+    
+
+
+    
+
+
+    
+
+
+    
+
+    
+    
+
+
+
+    
+
+
+
+
+
+
+    
     
 
 

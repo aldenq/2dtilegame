@@ -17,6 +17,18 @@ import player
 import entities
 import tools
 import copy
+import sys
+
+pygame.init()
+screen_size = (SCREEN_WIDTH*SCALE, SCREEN_HEIGHT*SCALE)
+ 
+flags =   DOUBLEBUF
+
+screen = pygame.display.set_mode(screen_size,flags)
+screen.set_alpha(None)
+print("loading in content packs")
+
+
 print("generating terrain...")
 st = time.time()
 world = World(WORLD_WIDTH,WORLD_HEIGHT)
@@ -25,14 +37,56 @@ print(f"drawing buffers")
 
 buffers = rendering.BufferMatrix(world,5,5)
 buffers.drawBuffers()
-
+print("done")
 entityManager = entities.EntityManager(world)
+itemManager = tools.ItemManager()
 
-mytool = tools.Tool("test tool")
 
 mainPlayer = player.Player(1000,1000)
 mainPlayer.fly = False
 mainPlayer.collider.hasGravity = True
+
+
+
+
+
+
+
+
+
+
+
+#content packs
+######################
+#this is just a ridiculous scheme for avoiding circular imports, will come up with better solution later.
+import contentPacks.basegame.basicBlocks as basicBlocks
+basicBlocks.mainPlayer = mainPlayer
+basicBlocks.buffers = buffers
+basicBlocks.world = world
+basicBlocks.entityManager = entityManager
+basicBlocks.tileManager = tiles.TileManager
+basicBlocks.screen = screen
+basicBlocks.addContent()
+
+import contentPacks.basegame.basictools as basictools
+basictools.mainPlayer = mainPlayer
+basictools.buffers = buffers
+basictools.world = world
+basictools.entityManager = entityManager
+basictools.tileManager = tiles.tileManager
+basictools.screen = screen
+basictools.Tool = tools.Tool
+basictools.itemManager = itemManager
+basictools.addContent()
+
+import contentPacks.basegame.basicEntities as basicEntities
+
+mainPlayer.tool = itemManager["pickaxe"]
+
+#######################
+
+
+
 
 
 
@@ -65,17 +119,9 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
  
-# initialize pygame
 print("init")
-pygame.init()
-screen_size = (SCREEN_WIDTH, SCREEN_HEIGHT)
- 
-# create a window
-flags =  DOUBLEBUF
 
-screen = pygame.display.set_mode(screen_size,flags)
-screen.set_alpha(None)
-
+print(pygame.display.get_driver())
 pygame.display.set_caption("pygame Test")
  
 # clock is used to set a max fps
@@ -178,6 +224,38 @@ def setblocks(x,y,x1,y1,tile):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 st = time.time()
 ast = time.time()
 frame = 0
@@ -191,58 +269,59 @@ def startGame():
             if event.type == pygame.QUIT:
                 running = False
                 pygame.quit()
+            
         
-        #clear the screen
-        #screen.fill((100,100,200))
+        # #clear the screen
+        # #screen.fill((100,100,200))
 
 
 
-        #print(1/(time.time()-st))
-        #st = time.time()
+        # #print(1/(time.time()-st))
+        # #st = time.time()
 
-        print(frame/(time.time() - ast), 1/(time.time()-st)  )
-        st = time.time()
-        #print(pygame.mouse.get_pos())
-        #screen.blit(buffers.buffers[0,0],(0,0))
-        mx,my = pygame.mouse.get_pos()
-        gx,gy = mainPlayer.camera.getGlobal(mx,my)
-        blockX,blockY = world.getBlock(gx,gy)
-        #print(blockX,blockY)
-        #print(world[blockX,blockY].lighting.passthroughs)
+        # print(frame/(time.time() - ast), 1/(time.time()-st)  )
+        # st = time.time()
+        # #print(pygame.mouse.get_pos())
+        # #screen.blit(buffers.buffers[0,0],(0,0))
+        # mx,my = pygame.mouse.get_pos()
+        # gx,gy = mainPlayer.camera.getGlobal(mx,my)
+        # blockX,blockY = world.getBlock(gx,gy)
+        # #print(blockX,blockY)
+        # #print(world[blockX,blockY].lighting.passthroughs)
 
 
 
         world.workOnWorkloads(8,buffers)
         input()
 
-        #st2 = time.time()
+        # #st2 = time.time()
         
         mainPlayer.showView(screen,buffers)
         #print(time.time()-st2)
-        #entityManager.drawEntities(screen,mainPlayer.camera)
+        entityManager.drawEntities(screen,mainPlayer.camera)
         mainPlayer.applyPhysics(world)
-        # entityManager.simulateEntities()
+        entityManager.simulateEntities()
         
             
         
 
             
-            #
+        #     #
             
             
-            #
+        #     #
             
             
-            #mainPlayer.collider.draw(screen,mainPlayer.camera)
+        #     #mainPlayer.collider.draw(screen,mainPlayer.camera)
         pygame.display.flip()
         #print(time.time()-st2)
 
         
-        # how many updates per second
-        #clock.tick(60)
+        
+        clock.tick(MAX_FPS)
 #print(__name__ == "__main__")
-#if __name__ == "__main__":
-#startGame()
+if __name__ == "__main__":
+    startGame()
 #pygame.quit()
 
 
