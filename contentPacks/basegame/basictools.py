@@ -1,3 +1,4 @@
+import pygame
 mainPlayer = None
 world = None
 buffers = None
@@ -29,6 +30,7 @@ def addContent():
 
 	pickaxe = Tool("pickaxe")
 	pickaxe.leftAction = mineBlock
+	pickaxe.icon = pygame.image.load("assets/pickaxe.png")
 	print(itemManager.items)
 	itemManager["pickaxe"] = pickaxe
 	

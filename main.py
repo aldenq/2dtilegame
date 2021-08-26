@@ -19,6 +19,10 @@ import tools
 import copy
 import sys
 
+from multiprocessing import Process, Value, Array, Lock,Queue
+
+
+
 pygame.init()
 screen_size = (SCREEN_WIDTH*SCALE, SCREEN_HEIGHT*SCALE)
  
@@ -46,9 +50,45 @@ mainPlayer = player.Player(1000,1000)
 mainPlayer.fly = False
 mainPlayer.collider.hasGravity = True
 
+INTERLACE_COUNT = 2
+INTERLACE_HEIGHT = SCREEN_HEIGHT/INTERLACE_COUNT
+RENDER_TARGET_FPS = 60
 
+def render(update,event,lock,events,fps,mouseX,mouseY,frameReady):
+    st = time.time()
+    odd = False
+    
+    while True:
+        #screen.flip()
+        #lock.acquire()
+        print(fps.value)
+        fps.value = int(1/(time.time()-st))
+        st = time.time()
+        while not frameReady.value:
+            pass
 
+        # for i in range(int(INTERLACE_COUNT/2)): #interlacer
+        #      #print("rendering")
+        #     update((0,((i)*2 + odd) * INTERLACE_HEIGHT-1,SCREEN_WIDTH, INTERLACE_HEIGHT+1))
+        
+        update()
+        odd = not odd
+        mx,my = pygame.mouse.get_pos()
 
+        mouseX.value = mx
+        mouseY.value = my
+        for i in pygame.event.get():
+            events.put((i.type,i.dict))
+
+        #for i in range(len(pygame.key.get_pressed())):
+        #  keys[i] = pygame.key.get_pressed()[i]
+        # #print(list(keys))
+
+        
+        stime = (1/RENDER_TARGET_FPS)-(time.time()-st)   
+        time.sleep(stime if stime > 0 else 0 )
+        #lock.release()
+        #print()   
 
 
 
@@ -135,7 +175,7 @@ running = True
 
 def input():
     global mainPlayer
-    keys=pygame.key.get_pressed()
+    #keys=pygame.key.get_pressed()
     #print(mainPlayer.xspeed)
     if keys[pygame.K_a]:
         mainPlayer.xspeed = -4
@@ -223,35 +263,18 @@ def setblocks(x,y,x1,y1,tile):
 
 
 
+keys = list(pygame.key.get_pressed())
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+lock = Lock()
+fps = Value('i', 0)
+mouseX = Value('i', 0)
+mouseY = Value('i', 0)
+frameReady = Value('i',0)
+eventQueue = Queue()
+#keys =  pygame.key.get_pressed()#Array('i',list())
+p = Process(target=render, args=(pygame.display.update,pygame.event,lock,eventQueue,fps,mouseX,mouseY,frameReady))
+p.daemon = True
+p.start()
 
 
 
@@ -260,15 +283,30 @@ st = time.time()
 ast = time.time()
 frame = 0
 def startGame():
-    global running,st,frame
+    global running,st,frame,keys
     
     #print("starting")
     while running:
         frame += 1
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-                pygame.quit()
+        # for event in pygame.event.get():
+        #     if event.type == pygame.QUIT:
+        #         running = False
+        #         pygame.quit()
+
+
+        #print(pygame.K_a,"a key")
+        while not eventQueue.empty():
+            type,dict = eventQueue.get_nowait()
+            if type == pygame.KEYDOWN:
+                keys[dict["key"]] = 1
+            if type == pygame.KEYUP:
+                keys[dict["key"]] = 0
+
+                #print(keys)
+                #print(dict)
+            if type == pygame.QUIT:
+                print("quit")
+    
             
         
         # #clear the screen
@@ -279,11 +317,12 @@ def startGame():
          #print(1/(time.time()-st))
         # #st = time.time()
 
-        print(frame/(time.time() - ast), 1/(time.time()-st)  )
+        #print(frame/(time.time() - ast), 1/(time.time()-st)  )
         st = time.time()
         # #print(pygame.mouse.get_pos())
         # #screen.blit(buffers.buffers[0,0],(0,0))
-        # mx,my = pygame.mouse.get_pos()
+        
+        #print(mouseX.value,mouseY.value)
         # gx,gy = mainPlayer.camera.getGlobal(mx,my)
         # blockX,blockY = world.getBlock(gx,gy)
         # #print(blockX,blockY)
@@ -295,12 +334,17 @@ def startGame():
         input()
 
         # #st2 = time.time()
-        
+        #print("aa")
+        #frameReady.value = False
+        frameReady.value = False
         mainPlayer.showView(screen,buffers)
+        
         #print(time.time()-st2)
         entityManager.drawEntities(screen,mainPlayer.camera)
         mainPlayer.applyPhysics(world)
         entityManager.simulateEntities()
+        frameReady.value = True
+        
         
             
         
@@ -313,12 +357,13 @@ def startGame():
             
             
         #     #mainPlayer.collider.draw(screen,mainPlayer.camera)
-        pygame.display.flip()
+        #pygame.display.flip()
         #print(time.time()-st2)
 
         
         
-        #clock.tick(MAX_FPS)
+        clock.tick(60)
+        
 #print(__name__ == "__main__")
 if __name__ == "__main__":
     startGame()
