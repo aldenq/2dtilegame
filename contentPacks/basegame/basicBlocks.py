@@ -15,24 +15,33 @@ itemManager = None
 def placeBlock(item,x,y):
     
     blockX,blockY = world.getBlock(x,y)
-    if world[blockX,blockY].tile.tileName != "air":
-        world[blockX,blockY].tile = tileManager["air"]
+    tile = item.places
+    
+    if world[blockX,blockY].tile.tileName != tile and not world[blockX,blockY].tile.isSolid:
+        world[blockX,blockY].tile = tileManager[tile]
         buffers.updateTile(blockX,blockY)
-        world.updateLighting(blockX,blockY,tileManager["air"])
-
+        world.updateLighting(blockX,blockY,tileManager[tile])
+        item.count -= 1
 
 
 
 
 def addContent():
 
+	
 
 
 
 
 
-
-
+	block = Tool("block")
+	block.leftAction = placeBlock
+	block.icon = pygame.image.load("assets/none.png")
+	block.places = None
+	block.stackable = True
+	#print(itemManager.items)
+	itemManager["block"] = block
+	
 
 
 
@@ -48,6 +57,11 @@ def addContent():
 	air.gRange = 0
 	air.image = pygame.image.load("assets/air.png")
 	#air.darkenImage()
+	
+	
+	
+	
+	
 	tileManager["air"] = air
 
 
@@ -56,8 +70,18 @@ def addContent():
 	dirt.tileID = 1
 	dirt.rRange = 5
 	dirt.bRange = 5
-	dirt.translucency = .6
+	dirt.translucency = .9
 	dirt.image = pygame.image.load("assets/dirt.bmp")
+	dirt.drops = "dirt"
+	
+	
+	dirtItem = itemManager["block"] #take generic block
+	dirtItem.places = "dirt" #configure it for dirt
+	dirtItem.icon = pygame.transform.scale(pygame.image.load("assets/dirt.bmp"), (20, 20))
+	itemManager["dirt"] = dirtItem #add new item back
+	
+	
+	
 	#dirt.darkenImage()
 	tileManager["dirt"] = dirt
 
@@ -80,7 +104,7 @@ def addContent():
 	stone.rRange = 5
 	stone.gRange =5
 	stone.bRange =5
-	stone.translucency = .6
+	stone.translucency = .9
 	tileManager["stone"] = stone
 
 
