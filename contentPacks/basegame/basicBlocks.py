@@ -36,7 +36,7 @@ def addContent():
 
 	block = Tool("block")
 	block.leftAction = placeBlock
-	block.icon = pygame.image.load("assets/none.png")
+	block.icon = pygame.image.load("contentPacks/basegame/assets/none.bmp")
 	block.places = None
 	block.stackable = True
 	#print(itemManager.items)
@@ -55,7 +55,7 @@ def addContent():
 	air.rRange = 0
 	air.bRange = 0
 	air.gRange = 0
-	air.image = pygame.image.load("assets/air.png")
+	air.image = pygame.image.load("contentPacks/basegame/assets//air.bmp")
 	#air.darkenImage()
 	
 	
@@ -71,13 +71,13 @@ def addContent():
 	dirt.rRange = 5
 	dirt.bRange = 5
 	dirt.translucency = .9
-	dirt.image = pygame.image.load("assets/dirt.bmp")
+	dirt.image = pygame.image.load("contentPacks/basegame/assets/dirt.bmp")
 	dirt.drops = "dirt"
 	
 	
 	dirtItem = itemManager["block"] #take generic block
 	dirtItem.places = "dirt" #configure it for dirt
-	dirtItem.icon = pygame.transform.scale(pygame.image.load("assets/dirt.bmp"), (20, 20))
+	dirtItem.icon = pygame.transform.scale(pygame.image.load("contentPacks/basegame/assets/dirt.bmp"), (20, 20))
 	itemManager["dirt"] = dirtItem #add new item back
 	
 	
@@ -93,7 +93,7 @@ def addContent():
 	dirtBackground.bRange = 5
 	dirtBackground.translucency = .97
 
-	dirtBackground.image = pygame.image.load("assets/dirtbackground.bmp")
+	dirtBackground.image = pygame.image.load("contentPacks/basegame/assets/dirtbackground.bmp")
 	#dirtBackground.darkenImage()
 	tileManager["dirtBackground"] = dirtBackground
 

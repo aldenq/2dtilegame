@@ -1,7 +1,9 @@
 
 import pygame
+import pygame.freetype
 from pygame.locals import *
 pygame.init()
+
 import math
 import time
 import random

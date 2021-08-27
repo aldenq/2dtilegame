@@ -1,7 +1,9 @@
 import copy,pygame
+import pygame.freetype
+
 from settings import ICON_HEIGHT, ICON_WIDTH
 
-countFont = pygame.font.SysFont('Comic Sans MS', 15)
+countFont = pygame.freetype.SysFont('Comic Sans MS', 15)
 
 class ItemManager():
     def __init__(self) -> None:
@@ -52,7 +54,8 @@ class Tool():
     
 
     def drawIcon(self,surface,x,y):
-        textsurface = countFont.render(str(self.count), False, (255, 255, 255))
+        textsurface,rect = countFont.render(str(self.count), fgcolor = (255, 255, 255),bgcolor=None)
+        #print(textsurface)
         self.icon.set_alpha(255)
         surface.blit(self.icon,(x,y))
 

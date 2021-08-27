@@ -34,7 +34,7 @@ def addContent():
 
 	pickaxe = Tool("pickaxe")
 	pickaxe.leftAction = mineBlock
-	pickaxe.icon = pygame.image.load("assets/pickaxe.png")
+	pickaxe.icon = pygame.image.load("contentPacks/basegame/assets/pickaxe.bmp")
 	print(itemManager.items)
 	itemManager["pickaxe"] = pickaxe
 	
