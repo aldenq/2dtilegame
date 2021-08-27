@@ -155,7 +155,43 @@ class lightingWorkload():
 
 
         for i in range(count):
-            self.rays.append(   ray(x,y, (6.283/count) *i,level ,255,255,255,world   )                          )
+            self.rays.append(   ray(x,y, (6.283/count) *i,level ,255,255,255,world   )        )
+
+class lightingWorkloadSunlight():
+
+    def __init__(self,x,y,world):
+        
+
+        self.x = x
+        self.y = y
+
+        if world[x,y].tile.sunlight > 0: #sunlight emitter
+            self.y += 1 #if it's a now emitter than no need to re-compute itself, only subsequent 
+
+        self.level = world[x,y].tile.sunlight
+        self.radius = 0
+        self.world = world
+        self.rays = []
+    
+
+    def step(self,buffers):
+        for i in range(8):
+            if self.world[self.x,self.y].tile.sunlight == 1:
+                self.level = 1
+            else:
+                self.level = self.world[self.x,self.y - 1].tile.sunlight * self.world[self.x,self.y].tile.translucency
+            self.world[self.x,self.y].tile.sunlight = self.level
+            buffers.updateTile(self.x ,self.y)
+            self.y +=1 
+            if self.level < LIGHTING_CUTOFF:
+                return(0)
+            #print(self.level)
+        return(self.level)
+        #if self.level <= LIGHTING_CUTOFF:
+            
+
+        
+
 
 
 
@@ -168,7 +204,6 @@ class World():
         self.world = Matrix(width,height)
         self.width = width
         self.height = height
-        self.genWorld()
         self.lightingWorkloads = []
 
         
@@ -218,12 +253,12 @@ class World():
                         #print("aaaa",cellTile,self.world[x,y-1].tile.tileName)
                         cell.tile = tiles.tileManager.fastCopy("dirt")
                         
-                        cell.tile.sunlight = self.world[x,y-1].tile.sunlight *.7
+                        cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
 
 
                     else:
-                        cell.tile = tiles.tileManager.fastCopy("dirtBackground")
-                        cell.tile.sunlight = self.world[x,y-1].tile.sunlight
+                        cell.tile = tiles.tileManager.fastCopy("dirtBackground") 
+                        cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
                         
 
                 elif y < UNDERGROUND_END + 24: #transition period
@@ -233,11 +268,11 @@ class World():
 
                         if block == 0:
                             cell.tile = tiles.tileManager.fastCopy("stone")
-                            cell.tile.sunlight = self.world[x,y-1].tile.sunlight *.9
+                            cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
                             
                         else:
                             cell.tile = tiles.tileManager.fastCopy("dirt")
-                            cell.tile.sunlight = self.world[x,y-1].tile.sunlight *.7
+                            cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
                             
 
 
@@ -246,22 +281,22 @@ class World():
                         if block == 0:
                            
                             cell.tile = tiles.tileManager.fastCopy("stoneBackground")
-                            cell.tile.sunlight = self.world[x,y-1].tile.sunlight
+                            cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
 
                         else:
                             
                             cell.tile = tiles.tileManager.fastCopy("dirtBackground")
-                            cell.tile.sunlight = self.world[x,y-1].tile.sunlight
+                            cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
 
                 else: #code for caves
                     if self.caveGen(x,y,caveSeed1,caveSeed2,-.1):
                         
                         cell.tile = tiles.tileManager.fastCopy("stone")
-                        cell.tile.sunlight = self.world[x,y-1].tile.sunlight *.9
+                        cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
                     else:
                         
                         cell.tile = tiles.tileManager.fastCopy("stoneBackground")
-                        cell.tile.sunlight = self.world[x,y-1].tile.sunlight
+                        cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
 
         #print("done")
 
@@ -307,23 +342,38 @@ class World():
 
 
     def workOnlighting(self,lightingWorkload,buffers):
-        originX =lightingWorkload.x
-        originY =lightingWorkload.y
-        
+
         done = False
 
-
-        offset = 0
-        for i in range(len(lightingWorkload.rays)):
-            cray = lightingWorkload.rays[i-offset]
-            level = cray.step(1,buffers)
+        if type(lightingWorkload) == lightingWorkloadSunlight:
+            #print("sunlight")
+            level = lightingWorkload.step(buffers)
             if level < LIGHTING_CUTOFF:
-                #print("killing")
-                del lightingWorkload.rays[i-offset]
-                offset += 1
-        if len(lightingWorkload.rays) == 0:
-            done = True
-            #print("done")
+                done = True
+
+
+
+
+
+        
+        else:
+            originX =lightingWorkload.x
+            originY =lightingWorkload.y
+            
+            
+
+
+            offset = 0
+            for i in range(len(lightingWorkload.rays)):
+                cray = lightingWorkload.rays[i-offset]
+                level = cray.step(1,buffers)
+                if level < LIGHTING_CUTOFF:
+                    #print("killing")
+                    del lightingWorkload.rays[i-offset]
+                    offset += 1
+            if len(lightingWorkload.rays) == 0:
+                done = True
+                #print("done")
 
 
 
@@ -359,6 +409,12 @@ class World():
 
 
     def updateLighting(self,x,y,tile):
+        
+
+        
+
+        workload = lightingWorkloadSunlight(x,y,self)
+        self.lightingWorkloads.append(workload)
 
         if tile.emissionlevel > 0:
             workload = lightingWorkload(x,y,tile.emissionlevel,145,self)

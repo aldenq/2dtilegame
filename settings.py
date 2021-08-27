@@ -4,7 +4,7 @@ MAX_FPS = 45
 
 
 WORLD_WIDTH = 1000  #tiles across world
-WORLD_HEIGHT = 800
+WORLD_HEIGHT = 600
 
 BUFFER_WIDTH = 20     #amount of tiles in a buffer
 BUFFER_HEIGHT = 20
@@ -25,3 +25,8 @@ UNDERGROUND_END = 250
 LIGHTING_CUTOFF = .02
 MAX_RANGE = 5
 SCALE = 1
+
+
+
+ICON_WIDTH = 20
+ICON_HEIGHT = 20

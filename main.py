@@ -1,7 +1,7 @@
 
 import pygame
 from pygame.locals import *
-
+pygame.init()
 import math
 import time
 import random
@@ -18,30 +18,21 @@ import entities
 import tools
 import copy
 import sys
+import UI
 
-from multiprocessing import Process, Value, Array, Lock,Queue
-
-
-
-pygame.init()
 screen_size = (SCREEN_WIDTH*SCALE, SCREEN_HEIGHT*SCALE)
  
 flags =   DOUBLEBUF
 
 screen = pygame.display.set_mode(screen_size,flags)
 #screen.set_alpha(None)
-print("loading in content packs")
 
 
-print("generating terrain...")
-st = time.time()
 world = World(WORLD_WIDTH,WORLD_HEIGHT)
-print(f"took: {time.time()-st}")
-print(f"drawing buffers")
 
 buffers = rendering.BufferMatrix(world,5,5)
-buffers.drawBuffers()
-print("done")
+
+
 entityManager = entities.EntityManager(world)
 itemManager = tools.ItemManager()
 
@@ -50,49 +41,8 @@ mainPlayer = player.Player(1000,1000)
 mainPlayer.fly = False
 mainPlayer.collider.hasGravity = True
 
-INTERLACE_COUNT = 2
-INTERLACE_HEIGHT = SCREEN_HEIGHT/INTERLACE_COUNT
-RENDER_TARGET_FPS = 60
 
-def render(update,event,lock,events,fps,mouseX,mouseY,frameReady):
-    st = time.time()
-    odd = False
-    
-    while True:
-        #screen.flip()
-        #lock.acquire()
-        print(fps.value)
-        fps.value = int(1/(time.time()-st))
-        st = time.time()
-        while not frameReady.value:
-            pass
-
-        # for i in range(int(INTERLACE_COUNT/2)): #interlacer
-        #      #print("rendering")
-        #     update((0,((i)*2 + odd) * INTERLACE_HEIGHT-1,SCREEN_WIDTH, INTERLACE_HEIGHT+1))
-        
-        update()
-        odd = not odd
-        mx,my = pygame.mouse.get_pos()
-
-        mouseX.value = mx
-        mouseY.value = my
-        for i in pygame.event.get():
-            events.put((i.type,i.dict))
-
-        #for i in range(len(pygame.key.get_pressed())):
-        #  keys[i] = pygame.key.get_pressed()[i]
-        # #print(list(keys))
-
-        
-        stime = (1/RENDER_TARGET_FPS)-(time.time()-st)   
-        time.sleep(stime if stime > 0 else 0 )
-        #lock.release()
-        #print()   
-
-
-
-
+print("loading in content packs")
 
 
 
@@ -104,8 +54,11 @@ basicBlocks.mainPlayer = mainPlayer
 basicBlocks.buffers = buffers
 basicBlocks.world = world
 basicBlocks.entityManager = entityManager
-basicBlocks.tileManager = tiles.TileManager
+basicBlocks.tileManager = tiles.tileManager
 basicBlocks.screen = screen
+basicBlocks.Tile = tiles.Tile
+basicBlocks.Tool = tools.Tool
+basicBlocks.itemManager = itemManager
 basicBlocks.addContent()
 
 import contentPacks.basegame.basictools as basictools
@@ -122,8 +75,33 @@ basictools.addContent()
 import contentPacks.basegame.basicEntities as basicEntities
 
 mainPlayer.tool = itemManager["pickaxe"]
-
+mainPlayer.tool.user = mainPlayer
 #######################
+
+
+
+
+
+
+
+
+print("generating terrain...")
+st = time.time()
+world.genWorld()
+
+print(f"took: {time.time()-st}")
+print(f"drawing buffers")
+
+buffers.drawBuffers()
+
+
+print("done")
+
+
+
+
+
+
 
 
 
@@ -175,7 +153,7 @@ running = True
 
 def input():
     global mainPlayer
-    #keys=pygame.key.get_pressed()
+    keys=pygame.key.get_pressed()
     #print(mainPlayer.xspeed)
     if keys[pygame.K_a]:
         mainPlayer.xspeed = -4
@@ -204,18 +182,35 @@ def input():
         mainPlayer.xspeed = 0
     
 
+    if mainPlayer.tool:
+        if pygame.mouse.get_pressed()[0]:
+            x,y = pygame.mouse.get_pos()
+            globalX,globalY = mainPlayer.camera.getGlobal(x,y)
+            mainPlayer.tool.leftClick(globalX,globalY)
+        
 
-    if pygame.mouse.get_pressed()[0]:
-        x,y = pygame.mouse.get_pos()
-        globalX,globalY = mainPlayer.camera.getGlobal(x,y)
-        mainPlayer.tool.leftClick(globalX,globalY)
-    
+        if pygame.mouse.get_pressed()[2]:
+            x,y = pygame.mouse.get_pos()
+            globalX,globalY = mainPlayer.camera.getGlobal(x,y)
+            mainPlayer.tool.rightClick(globalX,globalY)
 
-    if pygame.mouse.get_pressed()[2]:
-        x,y = pygame.mouse.get_pos()
-        globalX,globalY = mainPlayer.camera.getGlobal(x,y)
-        mainPlayer.tool.rightClick(globalX,globalY)
 
+    if keys[pygame.K_1]:
+       mainPlayer.selectTool(0)
+    if keys[pygame.K_2]:
+       mainPlayer.selectTool(1)
+    if keys[pygame.K_3]:
+       mainPlayer.selectTool(2)
+    if keys[pygame.K_4]:
+       mainPlayer.selectTool(3)
+    if keys[pygame.K_5]:
+       mainPlayer.selectTool(4)
+    if keys[pygame.K_6]:
+       mainPlayer.selectTool(5)
+    if keys[pygame.K_7]:
+       mainPlayer.selectTool(6)
+    if keys[pygame.K_8]:
+       mainPlayer.selectTool(7)
 
 
 
@@ -263,18 +258,35 @@ def setblocks(x,y,x1,y1,tile):
 
 
 
-keys = list(pygame.key.get_pressed())
 
-lock = Lock()
-fps = Value('i', 0)
-mouseX = Value('i', 0)
-mouseY = Value('i', 0)
-frameReady = Value('i',0)
-eventQueue = Queue()
-#keys =  pygame.key.get_pressed()#Array('i',list())
-p = Process(target=render, args=(pygame.display.update,pygame.event,lock,eventQueue,fps,mouseX,mouseY,frameReady))
-p.daemon = True
-p.start()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -282,31 +294,32 @@ p.start()
 st = time.time()
 ast = time.time()
 frame = 0
+
+
+
+
+hotbar = UI.HotBar()
+
+
+
+
+
 def startGame():
-    global running,st,frame,keys
+    global running,st,frame
     
     #print("starting")
+
+
+    mainPlayer.inventory.giveItem(itemManager["pickaxe"])
+    #mainPlayer.inventory.giveItem(itemManager["pickaxe"])
+    #mainPlayer.inventory.giveItem(itemManager["pickaxe"])
+    print(mainPlayer.inventory)
     while running:
         frame += 1
-        # for event in pygame.event.get():
-        #     if event.type == pygame.QUIT:
-        #         running = False
-        #         pygame.quit()
-
-
-        #print(pygame.K_a,"a key")
-        while not eventQueue.empty():
-            type,dict = eventQueue.get_nowait()
-            if type == pygame.KEYDOWN:
-                keys[dict["key"]] = 1
-            if type == pygame.KEYUP:
-                keys[dict["key"]] = 0
-
-                #print(keys)
-                #print(dict)
-            if type == pygame.QUIT:
-                print("quit")
-    
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                pygame.quit()
             
         
         # #clear the screen
@@ -319,10 +332,13 @@ def startGame():
 
         #print(frame/(time.time() - ast), 1/(time.time()-st)  )
         st = time.time()
+        
+
+
+        
         # #print(pygame.mouse.get_pos())
         # #screen.blit(buffers.buffers[0,0],(0,0))
-        
-        #print(mouseX.value,mouseY.value)
+        # mx,my = pygame.mouse.get_pos()
         # gx,gy = mainPlayer.camera.getGlobal(mx,my)
         # blockX,blockY = world.getBlock(gx,gy)
         # #print(blockX,blockY)
@@ -334,17 +350,13 @@ def startGame():
         input()
 
         # #st2 = time.time()
-        #print("aa")
-        #frameReady.value = False
-        frameReady.value = False
+        mainPlayer.inventory.manageInventory()
         mainPlayer.showView(screen,buffers)
-        
         #print(time.time()-st2)
+        hotbar.draw(mainPlayer,screen)
         entityManager.drawEntities(screen,mainPlayer.camera)
         mainPlayer.applyPhysics(world)
         entityManager.simulateEntities()
-        frameReady.value = True
-        
         
             
         
@@ -357,13 +369,12 @@ def startGame():
             
             
         #     #mainPlayer.collider.draw(screen,mainPlayer.camera)
-        #pygame.display.flip()
+        pygame.display.flip()
         #print(time.time()-st2)
 
         
         
-        clock.tick(60)
-        
+        clock.tick(MAX_FPS)
 #print(__name__ == "__main__")
 if __name__ == "__main__":
     startGame()

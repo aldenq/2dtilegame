@@ -21,8 +21,8 @@ class Player():
         self.collider.canClimb = True
         self.collider.hasGravity = True
 
-
-        self.inventory = Inventory()
+        self.hotbarSelect = 0
+        self.inventory = Inventory(self)
         self.tool = None
         self.AI = None
         self.fly = False
@@ -63,8 +63,9 @@ class Player():
         self.draw(surface)
 
     
-    def selectTool(self,x,y):
-        self.tool = self.inventory[x,y]
+    def selectTool(self,index):
+        self.tool = self.inventory[index,0]
+        self.hotbarSelect = index
 
 
 
@@ -80,25 +81,60 @@ class Inventory:
     """
 
 
-    def __init__(self) -> None:
+    def __init__(self,owner) -> None:
         self.items = Matrix(INVENTORY_WIDTH,INVENTORY_HEIGHT)
+        self.owner = owner
         pass
     
 
-    def __get__(self,loc):
+    def __getitem__(self,loc):
         return(self.items[loc])
 
 
-    def __set__(self,loc,item):
+    def __setitem__(self,loc,item):
         self.items[loc] = item
+    
+    def __repr__(self) -> str:
+        return(str(self.items))
+        pass
     
 
 
+    def manageInventory(self):
+        for y in range(INVENTORY_HEIGHT):
+            for x in range(INVENTORY_WIDTH):
+                if self.items[x,y] != 0:
+                    if self.items[x,y].count <= 0:
+                        self.items[x,y] = 0
+                        if y == 0 and self.owner.hotbarSelect == x:
+                            self.owner.tool = None
+                        
+
     def giveItem(self,item):
-        for x in range(INVENTORY_WIDTH):
-            for y in range(INVENTORY_HEIGHT):
-                if self.items[x,y] == None:
-                    self.items[x,y] = copy.copy(item)
+        lastFree = 0
+        for y in range(INVENTORY_HEIGHT):
+            for x in range(INVENTORY_WIDTH):
+                if self.items[x,y] == 0:
+
+                    if not lastFree:
+                        lastFree = (x,y)
+
+                    if item.stackable == False:
+                        self.items[x,y] = copy.copy(item)
+                        self.items[x,y].user = self.owner
+                        return()
+
+                elif self.items[x,y].name == item.name and item.stackable:
+                    self.items[x,y].count += 1
+                    return()
+        x,y = lastFree
+        self.items[x,y] = copy.copy(item)
+        self.items[x,y].user = self.owner
+                    
+
+                    #print("giving item")
+                    
+
     
     
     

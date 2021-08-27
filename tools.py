@@ -1,4 +1,8 @@
-import copy
+import copy,pygame
+from settings import ICON_HEIGHT, ICON_WIDTH
+
+countFont = pygame.font.SysFont('Comic Sans MS', 15)
+
 class ItemManager():
     def __init__(self) -> None:
         self.items= {}
@@ -25,13 +29,16 @@ class ItemManager():
 
 
 class Tool():
+    
     def __init__(self,name) -> None:
         self.leftAction  = None
         self.rightAction = None
         self.durability = 0
-        self.count = 0
+        self.count = 1
         self.stackable = False
         self.name = name
+        self.icon = None
+        self.user = None
         pass
     
     def leftClick(self, mouseX,mouseY):
@@ -41,6 +48,19 @@ class Tool():
     def rightClick(self,mouseX,mouseY):
         if callable(self.rightAction):
             self.rightAction(self,mouseX,mouseY)
+
+    
+
+    def drawIcon(self,surface,x,y):
+        textsurface = countFont.render(str(self.count), False, (255, 255, 255))
+        self.icon.set_alpha(255)
+        surface.blit(self.icon,(x,y))
+
+
+        surface.blit(textsurface,(x + ICON_WIDTH/2,y + ICON_HEIGHT - 6))
+
+
+
     
 
     
