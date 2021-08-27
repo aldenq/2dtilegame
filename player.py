@@ -56,6 +56,42 @@ class Player():
         pygame.draw.rect(surface, (100,25,20), (SCREEN_WIDTH/2 - self.width/2,SCREEN_HEIGHT/2 - self.height/2,self.width,self.height))
         pass
 
+    def drawCursor(self,surface,mouseX,mouseY,world):
+        globalX,globalY = self.camera.getGlobal(mouseX,mouseY)
+        blockX,blockY = world.getBlock(globalX,globalY)
+        red = 106
+        green = 198
+        blue = 247
+        #print(self.tool)
+        if self.tool != None and self.tool.maxRange != 0:
+            
+            
+
+
+            globalX2,globalY2 = self.camera.getGlobal(SCREEN_WIDTH/2,SCREEN_HEIGHT/2)
+            blockX2,blockY2 = world.getBlock(globalX2,globalY2)
+
+            
+            toolRange = self.tool.maxRange
+
+            dist = ((blockX-blockX2)**2 + (blockY-blockY2)**2)**.5
+
+            if dist > toolRange:
+                red = 232
+                green = 58 
+                blue = 5
+                self.tool.outOfRange = True
+            else:
+                self.tool.outOfRange = False
+
+
+
+        blockPXX,blockPXY = world.getPos(blockX,blockY)
+        drawX,drawY = self.camera.getOnscreen(blockPXX,blockPXY)
+
+
+        pygame.draw.rect(surface,(red, green, blue),(drawX,drawY,TILE_WIDTH,TILE_HEIGHT),2)
+
 
     def showView(self,surface,buffers):
         
@@ -110,7 +146,7 @@ class Inventory:
                             self.owner.tool = None
                         
 
-    def giveItem(self,item):
+    def giveItem(self,item,count = 1):
         lastFree = 0
         for y in range(INVENTORY_HEIGHT):
             for x in range(INVENTORY_WIDTH):
@@ -125,12 +161,12 @@ class Inventory:
                         return()
 
                 elif self.items[x,y].name == item.name and item.stackable:
-                    self.items[x,y].count += 1
+                    self.items[x,y].count += count
                     return()
         x,y = lastFree
         self.items[x,y] = copy.copy(item)
         self.items[x,y].user = self.owner
-                    
+        self.items[x,y].count = count
 
                     #print("giving item")
                     

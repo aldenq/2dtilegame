@@ -21,6 +21,7 @@ class Tile():
         self.onSpawn = None 
         self.lightSources = None
         self.drops = None
+        self.unbreakable = False
         pass
     def darkenImage(self):
         dark = pygame.Surface(self.image.get_size())
@@ -55,6 +56,7 @@ class TileManager():
         retTile.emissionlevel = tile.emissionlevel
         retTile.translucency = tile.translucency
         retTile.drops = tile.drops
+        retTile.unbreakable = tile.unbreakable
         #print(retTile.drops)
 
         #retTile.color.r = 
@@ -99,7 +101,7 @@ class TileManager():
         self.tiles[name] = tile
         tile.tileName = name
 
-tileManager = TileManager()
+
 
 
 

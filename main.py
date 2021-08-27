@@ -1,4 +1,5 @@
 
+from standardActions import Actions
 import pygame
 import pygame.freetype
 from pygame.locals import *
@@ -21,28 +22,35 @@ import tools
 import copy
 import sys
 import UI
-
+import standardActions
 screen_size = (SCREEN_WIDTH*SCALE, SCREEN_HEIGHT*SCALE)
  
 flags =   DOUBLEBUF
 
 screen = pygame.display.set_mode(screen_size,flags)
 #screen.set_alpha(None)
+tileManager = tiles.TileManager()
 
-
-world = World(WORLD_WIDTH,WORLD_HEIGHT)
+world = World(WORLD_WIDTH,WORLD_HEIGHT,tileManager)
 
 buffers = rendering.BufferMatrix(world,5,5)
 
-
 entityManager = entities.EntityManager(world)
+
 itemManager = tools.ItemManager()
+
 
 
 mainPlayer = player.Player(1000,1000)
 mainPlayer.fly = False
 mainPlayer.collider.hasGravity = True
 
+actions = standardActions.Actions(world,buffers,mainPlayer,tileManager,itemManager,entityManager)
+itemManager.standardActions=actions
+
+
+
+# world, buffers, mainPlayer,tileManager,itemManager,entityManager
 
 print("loading in content packs")
 
@@ -56,7 +64,7 @@ basicBlocks.mainPlayer = mainPlayer
 basicBlocks.buffers = buffers
 basicBlocks.world = world
 basicBlocks.entityManager = entityManager
-basicBlocks.tileManager = tiles.tileManager
+basicBlocks.tileManager = tileManager
 basicBlocks.screen = screen
 basicBlocks.Tile = tiles.Tile
 basicBlocks.Tool = tools.Tool
@@ -68,7 +76,7 @@ basictools.mainPlayer = mainPlayer
 basictools.buffers = buffers
 basictools.world = world
 basictools.entityManager = entityManager
-basictools.tileManager = tiles.tileManager
+basictools.tileManager = tileManager
 basictools.screen = screen
 basictools.Tool = tools.Tool
 basictools.itemManager = itemManager
@@ -256,42 +264,6 @@ def setblocks(x,y,x1,y1,tile):
 
     #print(blockX,blockY)
     #print("mouse down")
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 st = time.time()
 ast = time.time()
@@ -313,6 +285,7 @@ def startGame():
 
 
     mainPlayer.inventory.giveItem(itemManager["pickaxe"])
+    mainPlayer.inventory.giveItem(itemManager["bedrock"],count=100)
     #mainPlayer.inventory.giveItem(itemManager["pickaxe"])
     #mainPlayer.inventory.giveItem(itemManager["pickaxe"])
     print(mainPlayer.inventory)
@@ -340,7 +313,7 @@ def startGame():
         
         # #print(pygame.mouse.get_pos())
         # #screen.blit(buffers.buffers[0,0],(0,0))
-        # mx,my = pygame.mouse.get_pos()
+        
         # gx,gy = mainPlayer.camera.getGlobal(mx,my)
         # blockX,blockY = world.getBlock(gx,gy)
         # #print(blockX,blockY)
@@ -354,6 +327,8 @@ def startGame():
         # #st2 = time.time()
         mainPlayer.inventory.manageInventory()
         mainPlayer.showView(screen,buffers)
+        mx,my = pygame.mouse.get_pos()
+        mainPlayer.drawCursor(screen,mx,my,world )
         #print(time.time()-st2)
         hotbar.draw(mainPlayer,screen)
         entityManager.drawEntities(screen,mainPlayer.camera)

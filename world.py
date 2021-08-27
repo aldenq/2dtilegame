@@ -200,11 +200,12 @@ class lightingWorkloadSunlight():
 
 class World():
     
-    def __init__(self,width,height) -> None:
+    def __init__(self,width,height,tileManager) -> None:
         self.world = Matrix(width,height)
         self.width = width
         self.height = height
         self.lightingWorkloads = []
+        self.tileManager = tileManager
 
         
     def caveGen(self,x,y,seed1, seed2, weight):
@@ -215,6 +216,13 @@ class World():
             return(0)
     
 
+
+    def spawnRare(self,x,y,seed,weight,freq):
+        data = noise.snoise3(x/freq,y/freq, seed) + weight
+        if data > 0:
+            return(1)
+        else:
+            return(0)
 
 
 
@@ -227,6 +235,9 @@ class World():
         caveSeed1 = random.randint(0,100000) 
         caveSeed2 = random.randint(0,100000)
         gradient = 60/self.height
+
+
+        ironSeed = random.randint(0,90)
         
         for x in range(self.width):
             height = round(abs(noise.snoise2(x/50,seed2))*8) + round(abs(noise.snoise2(x/120,seed1))*8) + round(abs(noise.snoise2(x/1000,seed3))*30) + 200
@@ -245,19 +256,33 @@ class World():
                 if y < height:
 
                     
-                    cell.tile = tiles.tileManager.fastCopy("air")
+                    cell.tile = self.tileManager.fastCopy("air")
                    
-                
+                elif y == WORLD_HEIGHT-1:
+                    cell.tile = self.tileManager.fastCopy("bedrock")
+                    cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
+
                 elif y < UNDERGROUND_END:   #code for underground
+
+
+                    
                     if self.caveGen(x,y,caveSeed1,caveSeed2,.5):
                         #print("aaaa",cellTile,self.world[x,y-1].tile.tileName)
-                        cell.tile = tiles.tileManager.fastCopy("dirt")
+                        if self.spawnRare(x,y,ironSeed,-.5,5):
+                            cell.tile = self.tileManager.fastCopy("iron")
+                            
+                            cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
+                        else:
+                            cell.tile = self.tileManager.fastCopy("dirt")
+                            
+                            cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
+
                         
-                        cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
+
 
 
                     else:
-                        cell.tile = tiles.tileManager.fastCopy("dirtBackground") 
+                        cell.tile = self.tileManager.fastCopy("dirtBackground") 
                         cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
                         
 
@@ -267,11 +292,11 @@ class World():
                         
 
                         if block == 0:
-                            cell.tile = tiles.tileManager.fastCopy("stone")
+                            cell.tile = self.tileManager.fastCopy("stone")
                             cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
                             
                         else:
-                            cell.tile = tiles.tileManager.fastCopy("dirt")
+                            cell.tile = self.tileManager.fastCopy("dirt")
                             cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
                             
 
@@ -280,22 +305,22 @@ class World():
                     else:
                         if block == 0:
                            
-                            cell.tile = tiles.tileManager.fastCopy("stoneBackground")
+                            cell.tile = self.tileManager.fastCopy("stoneBackground")
                             cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
 
                         else:
                             
-                            cell.tile = tiles.tileManager.fastCopy("dirtBackground")
+                            cell.tile = self.tileManager.fastCopy("dirtBackground")
                             cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
 
                 else: #code for caves
                     if self.caveGen(x,y,caveSeed1,caveSeed2,-.1):
                         
-                        cell.tile = tiles.tileManager.fastCopy("stone")
+                        cell.tile = self.tileManager.fastCopy("stone")
                         cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
                     else:
                         
-                        cell.tile = tiles.tileManager.fastCopy("stoneBackground")
+                        cell.tile = self.tileManager.fastCopy("stoneBackground")
                         cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
 
         #print("done")

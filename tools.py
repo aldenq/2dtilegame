@@ -8,6 +8,7 @@ countFont = pygame.freetype.SysFont('Comic Sans MS', 15)
 class ItemManager():
     def __init__(self) -> None:
         self.items= {}
+        self.standardActions = None
         pass
 
 
@@ -19,6 +20,17 @@ class ItemManager():
 
     def __setitem__(self,loc,value):
         self.items[loc]=value
+    
+
+    def addFromTile(self,tile,imagePath):
+        tool = Tool(tile.tileName)
+        tool.icon = pygame.transform.scale(pygame.image.load(imagePath), (ICON_WIDTH,ICON_HEIGHT))
+        tool.places = tile.tileName
+        tool.stackable = True
+        tool.leftAction = self.standardActions.placeBlock
+        tile.drops = tile.tileName 
+        self.items[tile.tileName] = tool
+        return(tool)
 
 
 
@@ -41,6 +53,8 @@ class Tool():
         self.name = name
         self.icon = None
         self.user = None
+        self.maxRange = 0
+        self.outOfRange = False
         pass
     
     def leftClick(self, mouseX,mouseY):
@@ -62,7 +76,8 @@ class Tool():
 
         surface.blit(textsurface,(x + ICON_WIDTH/2,y + ICON_HEIGHT - 6))
 
-
+   
+        
 
     
 
