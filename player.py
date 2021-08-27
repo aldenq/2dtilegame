@@ -63,7 +63,7 @@ class Player():
         green = 198
         blue = 247
         #print(self.tool)
-        if self.tool != None and self.tool.maxRange != 0:
+        if self.tool and self.tool.maxRange != 0:
             
             
 
