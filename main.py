@@ -23,6 +23,7 @@ import copy
 import sys
 import UI
 import standardActions
+import lightingSystem
 screen_size = (SCREEN_WIDTH*SCALE, SCREEN_HEIGHT*SCALE)
  
 flags =   DOUBLEBUF
@@ -32,6 +33,7 @@ screen = pygame.display.set_mode(screen_size,flags)
 tileManager = tiles.TileManager()
 
 world = World(WORLD_WIDTH,WORLD_HEIGHT,tileManager)
+
 
 buffers = rendering.BufferMatrix(world,5,5)
 
@@ -98,7 +100,8 @@ mainPlayer.tool.user = mainPlayer
 print("generating terrain...")
 st = time.time()
 world.genWorld()
-
+lighting = lightingSystem.LightingInterface(world)
+world.lightingInterface = lighting
 print(f"took: {time.time()-st}")
 print(f"drawing buffers")
 
@@ -286,6 +289,7 @@ def startGame():
 
     mainPlayer.inventory.giveItem(itemManager["pickaxe"])
     mainPlayer.inventory.giveItem(itemManager["bedrock"],count=100)
+    mainPlayer.inventory.giveItem(itemManager["torch"],count=100)
     #mainPlayer.inventory.giveItem(itemManager["pickaxe"])
     #mainPlayer.inventory.giveItem(itemManager["pickaxe"])
     print(mainPlayer.inventory)
@@ -306,7 +310,11 @@ def startGame():
         # #st = time.time()
 
         #print(frame/(time.time() - ast), 1/(time.time()-st)  )
-        st = time.time()
+        # st = time.time()
+        # for i in range(50):
+        #     buffers.updateTile(0,0)
+        # print(time.time()-st)
+       
         
 
 
@@ -320,10 +328,14 @@ def startGame():
         # #print(world[blockX,blockY].lighting.passthroughs)
 
 
+        for i in range(30):
+            lighting.UpdateFromQueue(buffers)
+
+
 
         world.workOnWorkloads(8,buffers)
         input()
-
+        #print("a")
         # #st2 = time.time()
         mainPlayer.inventory.manageInventory()
         mainPlayer.showView(screen,buffers)

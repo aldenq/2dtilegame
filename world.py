@@ -13,7 +13,7 @@ class lightingData():
     Does not change when a tile is updated
     """
     def __init__(self) -> None:
-        self.lighting = Color(0,0,0)
+        self.lighting = 0
         self.passthroughs = []
         pass
 
@@ -135,6 +135,7 @@ class ray():
 
 
 
+
         
 
         #self.origin
@@ -206,7 +207,7 @@ class World():
         self.height = height
         self.lightingWorkloads = []
         self.tileManager = tileManager
-
+        self.lightingInterface = None
         
     def caveGen(self,x,y,seed1, seed2, weight):
         data = noise.snoise2(x/50 + seed1,y/50 + seed2) + weight
@@ -441,21 +442,25 @@ class World():
         workload = lightingWorkloadSunlight(x,y,self)
         self.lightingWorkloads.append(workload)
 
-        if tile.emissionlevel > 0:
-            workload = lightingWorkload(x,y,tile.emissionlevel,145,self)
-            self.lightingWorkloads.append(workload)
-        else:
-            workload = lightingWorkload(x,y,0,0,self)
-            workload.rays = []
-            for i in self.world[x,y].lighting.passthroughs:
-                out = copy.copy(i)
-                out.color = copy.copy(i.color)
-                workload.rays.append(out)
-            #= copy.deepcopy(self.world[x,y].lighting.passthroughs)
-            #for i in workload.rays:
-            #    i = cop
-            self.lightingWorkloads.append(workload)
-            #print(self.lightingWorkloads[0].rays)
+
+
+
+        self.lightingInterface.sendEvent(x,y)
+        # if tile.emissionlevel > 0:
+        #     workload = lightingWorkload(x,y,tile.emissionlevel,145,self)
+        #     self.lightingWorkloads.append(workload)
+        # else:
+        #     workload = lightingWorkload(x,y,0,0,self)
+        #     workload.rays = []
+        #     for i in self.world[x,y].lighting.passthroughs:
+        #         out = copy.copy(i)
+        #         out.color = copy.copy(i.color)
+        #         workload.rays.append(out)
+        #     #= copy.deepcopy(self.world[x,y].lighting.passthroughs)
+        #     #for i in workload.rays:
+        #     #    i = cop
+        #     self.lightingWorkloads.append(workload)
+        #     #print(self.lightingWorkloads[0].rays)
             
 
 

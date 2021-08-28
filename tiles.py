@@ -100,6 +100,7 @@ class TileManager():
     def addTile(self,name,tile):
         self.tiles[name] = tile
         tile.tileName = name
+        tile.image = pygame.Surface.convert(tile.image)
 
 
 

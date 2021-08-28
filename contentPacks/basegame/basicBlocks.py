@@ -71,7 +71,7 @@ def addContent():
 	dirt.tileID = 1
 	dirt.rRange = 5
 	dirt.bRange = 5
-	dirt.translucency = .9
+	dirt.translucency = .7
 	dirt.image = pygame.image.load("contentPacks/basegame/assets/dirt.bmp")
 	dirt.drops = "dirt"
 	
@@ -92,7 +92,7 @@ def addContent():
 	dirtBackground.tileID = 0
 	dirtBackground.rRange = 5
 	dirtBackground.bRange = 5
-	dirtBackground.translucency = .97
+	dirtBackground.translucency = .85
 
 	dirtBackground.image = pygame.image.load("contentPacks/basegame/assets/dirtbackground.bmp")
 	#dirtBackground.darkenImage()
@@ -115,23 +115,13 @@ def addContent():
 	stoneBackground.rRange = 5
 	stoneBackground.gRange = 5
 	stoneBackground.bRange = 5
-	stoneBackground.translucency = .97
+	stoneBackground.translucency = .94
 
 	tileManager["stoneBackground"] = stoneBackground
 	
 	
 	
 	
-	
-	stoneBackground = Tile(50,30,9)
-	stoneBackground.isSolid = False
-	stoneBackground.tileID = 0
-	stoneBackground.rRange = 5
-	stoneBackground.gRange = 5
-	stoneBackground.bRange = 5
-	stoneBackground.translucency = .97
-
-	tileManager["stoneBackground"] = stoneBackground
 	
 	
 	
@@ -146,7 +136,7 @@ def addContent():
 	bedrock.rRange = 5
 	bedrock.gRange = 5
 	bedrock.bRange = 5
-	bedrock.translucency = .97
+	bedrock.translucency = .9
 	bedrock.unbreakable = True
 	bedrock.image = pygame.image.load("contentPacks/basegame/assets/bedrock.bmp")
 	tileManager["bedrock"] = bedrock
@@ -165,11 +155,31 @@ def addContent():
 	iron.tileID = 1
 	iron.rRange = 5
 	iron.bRange = 5
-	iron.translucency = .9
+	iron.translucency = .6
 	iron.image = pygame.image.load("contentPacks/basegame/assets/iron.bmp")
 	tileManager["iron"] = iron
 	
 	itemManager.addFromTile(iron,"contentPacks/basegame/assets/iron.bmp")
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	torchTile = Tile(100, 183, 0) #create a new tile
+	torchTile.emissionlevel = 2 #have that tile emit light at a level of 1
+	torchTile.isSolid = False
+	torchTile.translucency = 1 #have light pass through the tile perfectly
+	torchTile.image = pygame.image.load("contentPacks/basegame/assets/torch.bmp")
+	
+	tileManager["torch"] = torchTile #tell the game about this new tile
+	itemManager.addFromTile(torchTile,"contentPacks/basegame/assets/torch.bmp")
+	
 	
 	#dirtItem = itemManager["iron"] #take generic block
 	#dirtItem.places = "iron" #configure it for dirt
