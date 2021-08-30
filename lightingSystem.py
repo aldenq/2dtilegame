@@ -1,10 +1,12 @@
 import multiprocessing as mp
+from typing import NewType
 from world import World
 from settings import *
 from helpers import *
 import math
 import copy
 import queue
+import random
 """"
 File that contains everything to run a threaded ray marcher and general lighting system
 
@@ -53,10 +55,22 @@ every
 to be clear, i recognize the ridiculousness of running a ray marcher in python on the cpu of a cpu bound game 
 
 
+
+most optimizations in this thread should be done with the intent of speeding up the main thread.
 """
 EMISSION_LEVEL_TO_INTENSITY_SCALE = 1
 EMISSION_LEVEL_RAY_COUNT_SCALE = 40
 rays = []
+
+
+
+
+
+
+
+
+
+
 
 class Ray():
     """
@@ -85,7 +99,7 @@ class Ray():
 
     def step(self):
         tileX,tileY = 0,0
-        
+        #print(self.x)
     
         
         
@@ -110,20 +124,32 @@ class Ray():
 
         self.lastTileX = tileX
         self.lastTileY = tileY
+        preLevel = self.tile.lightLevel
+        preIntensity = self.intensity
+        preX = self.x
+        preY = self.y
+
+        newLevel = preLevel
 
         while self.lastTileX == tileX and self.lastTileY == tileY:
+
             #print("repeat")
             #self.color.r = self.color.r*(1-self.tile.tile.colorTranslucency.r)
             #self.color.g = self.color.g*(1-self.tile.tile.colorTranslucency.g)
             #self.color.b = self.color.b*(1-self.tile.tile.colorTranslucency.b)
-
+            #print("repeating",self.xspeed,self.yspeed)
 
             self.intensity *= self.tile.translucency
             #print(self.color,tile.tile.colorTranslucency, )
             #self.tile.lighting.lighting.r += self.color.r
             #self.tile.lighting.lighting.g += self.color.g
             #self.tile.lighting.lighting.b += self.color.b
-            self.tile.lightLevel += self.intensity
+
+            newLevel += self.intensity
+
+
+            
+            
             self.x += self.xspeed
             self.y += self.yspeed
             tileX,tileY = self.getBlock(self.x,self.y)
@@ -133,7 +159,35 @@ class Ray():
 
         
         #print("raying and tracing", self.x,self.y,self.xspeed,self.yspeed,self.intensity)
-        return(self.lastTileX ,self.lastTileY, self.tile.lightLevel)
+       
+        levelDelta = newLevel-preLevel #the summed effect of all rays from the same origin to this tile
+
+        speedloc = (self.xspeed,self.yspeed,preX,preY,self.origin)
+
+        # if speed == (0,0):
+        #     print("bad speed")
+        #print(speed,"speed")
+        #print(self.tile.rays)
+        if speedloc in self.tile.rays: 
+            lastRay = self.tile.rays[speedloc]
+            rayDelta = levelDelta-lastRay[0]
+            
+            self.tile.rays[speedloc] = [levelDelta,  preIntensity]
+
+
+
+
+        else:  #first time from specified origin 
+            rayDelta = levelDelta
+            #print(speed)
+            self.tile.rays[speedloc] = [levelDelta,preIntensity]  #pre intensity is stored rather than the actual intensity so that the step can be re simulated later
+
+
+        self.tile.lightLevel += rayDelta
+        #self.tile.rays[self.origin] 
+
+
+        return(self.lastTileX ,self.lastTileY, self.tile.lightLevel,self.intensity,rayDelta)
 
 
 
@@ -175,17 +229,6 @@ class lightingCell:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
 def lightingSystemStart(eventsQ: mp.Queue, updatesQ: mp.Queue, lightingMatrix: Matrix):
     global rays
     #updates: x,y,lightLevel
@@ -207,24 +250,84 @@ def lightingSystemStart(eventsQ: mp.Queue, updatesQ: mp.Queue, lightingMatrix: M
                 cell = lightingMatrix[x,y]
                 emissionDelta = emissionlevel-cell.emissionlevel
 
-                if emissionDelta > 0:
+                if emissionDelta > 0: #if emissive event (new light source being added)
                     count = int(EMISSION_LEVEL_RAY_COUNT_SCALE * emissionlevel)
                     for i in range(count):
-                        rays.append(  Ray(x,y, (6.283/count) *i,emissionlevel*EMISSION_LEVEL_TO_INTENSITY_SCALE,lightingMatrix)        )
+                        rays.append(  Ray(x,y, (6.283/count) *i,emissionlevel*EMISSION_LEVEL_TO_INTENSITY_SCALE,lightingMatrix))
+                
+                
+                
+                if emissionDelta == 0: #if standard block is added or deleted
+                    
+
+                    translucencyDelta = translucency-lightingMatrix[x,y].translucency
+
+
+                    #print(translucencyDelta, "tdelta")
+                    lightingMatrix[x,y].translucency = translucency
+                    for speedloc in cell.rays:
+                        levelDelta,intensity = cell.rays[speedloc]
+                        #intensityDelta = translucencyDelta*intensity
+
+
+                        #print(intensityDelta, "int delta")
+                        
+                        ray= Ray(0,0, 0,intensity,lightingMatrix)
+                        ray.xspeed,ray.yspeed,x,y,origin = speedloc
+                        #print(ray.xspeed,ray.yspeed,"new")
+                        ray.x = x
+                        ray.y = y
+                        ray.origin = origin
+                        rays.append(ray)
+
+
+
+
+                        #print(cell.rays[origin] , "value")
+
+
+
+
+                    pass
+
+
+                else: #if emiter is getting destroyed
+                    pass
         except queue.Empty:
             pass
 
         offset = 0
         #print("ru")
+        lastX = None
+        lastY = None
+        lastLL = 0
         for i in range(len(rays)):
             ray = rays[i - offset]
-            x,y,intensity = ray.step()
-            if intensity < LIGHTING_CUTOFF:
+            x,y,lightLevel,intensity,delta = ray.step()
+            #updatesQ.put((x,y,lightLevel))
+
+            if lastX== x and lastY==y: #rays that are near each other in the rays list have a higher probability of being near each other in space
+                lastLL = lightLevel
+            else:
+                if lastX != None:
+                    updatesQ.put((lastX,lastY,lastLL))
+                lastLL = lightLevel
+                lastX = x
+                lastY = y
+
+                
+
+
+            #print(x,y,lightLevel,intensity,delta)
+            if abs(delta) < LIGHTING_CUTOFF and abs(intensity) < LIGHTING_CUTOFF:
                 #print("killing")
                 del rays[i - offset]
                 offset += 1
+
+        if lastX != None:
+            updatesQ.put((lastX,lastY,lastLL))
+        
             
-            updatesQ.put((x,y,intensity))
 
             
 
@@ -273,8 +376,12 @@ class LightingInterface():
         for x in range(self.world.width):
             for y in range(self.world.height):
                 cell = self.world[x,y]
-                translucency = cell.tile.translucency
-                emissionlevel = cell.tile.emissionlevel
+
+                tile = cell.tile
+                if not tile:
+                    tile = cell.backgroundTile
+                translucency = tile.translucency
+                emissionlevel = tile.emissionlevel
                 lightLevel = cell.lighting.lighting
 
                 self.lightingMatrix[x,y] = (translucency,lightLevel,emissionlevel)
@@ -283,8 +390,12 @@ class LightingInterface():
 
     def sendEvent(self,x,y):
         cell = self.world[x,y]
-        translucency = cell.tile.translucency
-        emissionlevel = cell.tile.emissionlevel
+        tile = cell.tile
+        if not tile:
+            tile = cell.backgroundTile
+
+        translucency = tile.translucency
+        emissionlevel = tile.emissionlevel
         #lightLevel = cell.lighting.lighting
         self.events.put((x,y,translucency,emissionlevel))
     
@@ -298,7 +409,9 @@ class LightingInterface():
                 #print("data",x,y,lightLevel)
                 self.world[x,y].lighting.lighting = lightLevel
                 buffers.updateTile(x,y)
+                return(1)
         except queue.Empty:
+            return(0)
             pass
 
 

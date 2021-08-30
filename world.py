@@ -14,6 +14,7 @@ class lightingData():
     """
     def __init__(self) -> None:
         self.lighting = 0
+        self.sunlight = 0
         self.passthroughs = []
         pass
 
@@ -26,6 +27,7 @@ class Cell():
     def __init__(self) -> None:
         self.lighting = lightingData()
         self.tile = None
+        self.backgroundTile = None
         pass
 
     
@@ -165,23 +167,29 @@ class lightingWorkloadSunlight():
 
         self.x = x
         self.y = y
+        # if world[x,y].tile:
+        #     if world[x,y].tile.sunlightEmissive > 0: #sunlight emitter
+        #         self.y += 1 #if it's a now emitter than no need to re-compute itself, only subsequent 
+        # else:
+        #     if world[x,y].backgroundTile.sunlightEmissive > 0: #sunlight emitter
+        #         self.y += 1 #if it's a now emitter than no need to re-compute itself, only subsequent 
 
-        if world[x,y].tile.sunlight > 0: #sunlight emitter
-            self.y += 1 #if it's a now emitter than no need to re-compute itself, only subsequent 
-
-        self.level = world[x,y].tile.sunlight
+        self.level = world[x,y].lighting.sunlight
         self.radius = 0
         self.world = world
-        self.rays = []
+        #self.rays = []
     
 
     def step(self,buffers):
         for i in range(8):
-            if self.world[self.x,self.y].tile.sunlight == 1:
-                self.level = 1
-            else:
-                self.level = self.world[self.x,self.y - 1].tile.sunlight * self.world[self.x,self.y].tile.translucency
-            self.world[self.x,self.y].tile.sunlight = self.level
+           
+                
+            tile = self.world[self.x,self.y].tile
+            if not tile:
+                tile = self.world[self.x,self.y].backgroundTile
+
+            self.level = self.world[self.x,self.y - 1].lighting.sunlight * tile.translucency  + tile.sunlightEmissive
+            self.world[self.x,self.y].lighting.sunlight = self.level
             buffers.updateTile(self.x ,self.y)
             self.y +=1 
             if self.level < LIGHTING_CUTOFF:
@@ -257,72 +265,108 @@ class World():
                 if y < height:
 
                     
-                    cell.tile = self.tileManager.fastCopy("air")
+                    cell.backgroundTile = self.tileManager.fastCopy("air")
+                    #cell.tile.sunlight = cell.tile.sunlightEmissive
                    
                 elif y == WORLD_HEIGHT-1:
                     cell.tile = self.tileManager.fastCopy("bedrock")
-                    cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
+                    #cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency + cell.tile.sunlightEmissive
 
+
+                
                 elif y < UNDERGROUND_END:   #code for underground
 
+                    if y < UNDERGROUND_END-2:
+                        cell.backgroundTile = self.tileManager.fastCopy("air") 
+                    else:
+                        cell.backgroundTile = self.tileManager.fastCopy("dirtBackground") 
 
-                    
-                    if self.caveGen(x,y,caveSeed1,caveSeed2,.5):
+                    if self.caveGen(x,y,caveSeed1,caveSeed2,.4):
                         #print("aaaa",cellTile,self.world[x,y-1].tile.tileName)
                         if self.spawnRare(x,y,ironSeed,-.5,5):
                             cell.tile = self.tileManager.fastCopy("iron")
                             
-                            cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
+                            #cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency + cell.tile.sunlightEmissive
                         else:
-                            cell.tile = self.tileManager.fastCopy("dirt")
+                            if y == height:
+                                cell.tile = self.tileManager.fastCopy("grass")
+                            else:
+                                cell.tile = self.tileManager.fastCopy("dirt")
                             
-                            cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
+                            #cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency + cell.tile.sunlightEmissive
 
                         
 
 
 
-                    else:
-                        cell.tile = self.tileManager.fastCopy("dirtBackground") 
-                        cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
+                    #else:
+                        
+                        #cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency + cell.tile.sunlightEmissive
                         
 
                 elif y < UNDERGROUND_END + 24: #transition period
                     block = random.randint(0,round(24/((y-UNDERGROUND_END)+1))  )
+
+                    if block == 0:
+                           
+                        cell.backgroundTile = self.tileManager.fastCopy("stoneBackground")
+                            #cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency + cell.tile.sunlightEmissive
+
+                    else:
+                            
+                        cell.backgroundTile = self.tileManager.fastCopy("dirtBackground")
+
+
                     if self.caveGen(x,y,caveSeed1,caveSeed2,.5 - (y-UNDERGROUND_END)*.025):
                         
 
                         if block == 0:
                             cell.tile = self.tileManager.fastCopy("stone")
-                            cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
+                            #cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency + cell.tile.sunlightEmissive
                             
                         else:
                             cell.tile = self.tileManager.fastCopy("dirt")
-                            cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
+                            #cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency + cell.tile.sunlightEmissive
                             
 
 
 
-                    else:
-                        if block == 0:
-                           
-                            cell.tile = self.tileManager.fastCopy("stoneBackground")
-                            cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
-
-                        else:
-                            
-                            cell.tile = self.tileManager.fastCopy("dirtBackground")
-                            cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
+                    
+                        
+                            #cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency + cell.tile.sunlightEmissive
 
                 else: #code for caves
-                    if self.caveGen(x,y,caveSeed1,caveSeed2,-.1):
+                    cell.backgroundTile = self.tileManager.fastCopy("stoneBackground")
+                    if self.caveGen(x,y,caveSeed1,caveSeed2,.025):
                         
                         cell.tile = self.tileManager.fastCopy("stone")
-                        cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
-                    else:
+                        #cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency + cell.tile.sunlightEmissive
+                    
                         
-                        cell.tile = self.tileManager.fastCopy("stoneBackground")
-                        cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency
+                        
+                        #cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency + cell.tile.sunlightEmissive
+
+
+
+
+
+
+                #compute sunlighting
+
+
+                if y > 0:
+                    tile = cell.tile
+                    if not tile:
+                        tile = cell.backgroundTile
+                    #translucency = tile.translucency
+
+                    cell.lighting.sunlight = self.world[x,y-1].lighting.sunlight * tile.translucency + tile.sunlightEmissive
+                
+
+
+
+
+
 
         #print("done")
 
@@ -438,14 +482,14 @@ class World():
         
 
         
-
+        self.lightingInterface.sendEvent(x,y)
         workload = lightingWorkloadSunlight(x,y,self)
         self.lightingWorkloads.append(workload)
 
 
 
 
-        self.lightingInterface.sendEvent(x,y)
+        
         # if tile.emissionlevel > 0:
         #     workload = lightingWorkload(x,y,tile.emissionlevel,145,self)
         #     self.lightingWorkloads.append(workload)

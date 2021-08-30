@@ -65,30 +65,37 @@ class BufferMatrix():
             for localY in range(self.bufferTileY):
                 globalX = localX+offsetX
                 globalY = localY+offsetY
-                tile = self.world[globalX,globalY]
+                cell = self.world[globalX,globalY]
+                tile = cell.tile
                 #print(tile)
                 
 
+                if not cell.tile:
+                    tile = cell.backgroundTile
+                if FULL_BRIGHT:
+                    brightness = 255
+                else:
+                    brightness =  cell.lighting.lighting*255 + cell.lighting.sunlight*255
 
 
-                brightness = tile.tile.sunlight*255
-                red = int(tile.tile.color.r * (tile.tile.sunlight + tile.lighting.lighting))
+                if brightness > 255: brightness=255
+                red = int(tile.color.r * (cell.lighting.sunlight + cell.lighting.lighting))
                 if red > 255: red = 255
-                green = int(tile.tile.color.g * (tile.tile.sunlight + tile.lighting.lighting))
+                green = int(tile.color.g * (cell.lighting.sunlight + cell.lighting.lighting))
                 if green > 255: green = 255
-                blue = int(tile.tile.color.b *(tile.tile.sunlight + tile.lighting.lighting))
+                blue = int(tile.color.b *(cell.lighting.sunlight + cell.lighting.lighting))
                 if blue>255: blue = 255
                 #print(red,green,blue, tile.color,globalX,globalY)
 
 
-                if tile.tile.image == None:
+                if tile.image == None:
                     pygame.draw.rect(buffer,(red,green,blue),(localX*TILE_WIDTH,localY * TILE_HEIGHT,TILE_WIDTH,TILE_HEIGHT))
                 else:
-                    tile.tile.image.set_alpha(brightness)
+                    tile.image.set_alpha(brightness)
                     buffer.blit(lighting, (localX*TILE_WIDTH,localY * TILE_HEIGHT))
                     #print(brightness)
                     
-                    buffer.blit(tile.tile.image, (localX*TILE_WIDTH,localY * TILE_HEIGHT))
+                    buffer.blit(tile.image, (localX*TILE_WIDTH,localY * TILE_HEIGHT))
                     
                     #pygame.draw.rect(buffer,(red,green,blue,1),(localX*TILE_WIDTH,localY * TILE_HEIGHT,TILE_WIDTH,TILE_HEIGHT))
 
@@ -96,31 +103,48 @@ class BufferMatrix():
     def updateTile(self,x,y):
 
         bufferx,buffery = self.getBuffer(x,y)
-        tile = self.world[x,y]
+        
+        cell = self.world[x,y]
+        tile = cell.tile
+
         buffer = self.buffers[bufferx,buffery]
 
         localX = x-self.bufferTileX*bufferx
         localY = y-self.bufferTileY*buffery
 
-        #summedLight = tile.sunlight + tile.lightLevel
-        #pygame.draw.rect(buffer,(tile.r * summedLight,tile.g * summedLight,tile.b * summedLight),(localX*TILE_WIDTH,localY * TILE_HEIGHT,TILE_WIDTH,TILE_HEIGHT))
-        brightness = tile.tile.sunlight*255 + tile.lighting.lighting*255
-        if brightness > 255: brightness=255
-        red = tile.tile.color.r * (tile.tile.sunlight + tile.lighting.lighting)
-        if red > 255: red = 255
-        green = tile.tile.color.g * (tile.tile.sunlight + tile.lighting.lighting)
-        if green > 255: green = 255
-        blue = tile.tile.color.b *(tile.tile.sunlight + tile.lighting.lighting)
-        if blue>255: blue = 255
-
         
-        #pygame.draw.rect(buffer,(red,green,blue),(localX*TILE_WIDTH,localY * TILE_HEIGHT,TILE_WIDTH,TILE_HEIGHT))
-        if tile.tile.image == None:
+        
+        #print(tile)
+        
+
+        if not cell.tile:
+            tile = cell.backgroundTile
+        if FULL_BRIGHT:
+            brightness = 255
+        else:
+            brightness =  cell.lighting.lighting*255 + cell.lighting.sunlight*255
+
+
+        if brightness > 255: brightness=255
+        red = int(tile.color.r * (cell.lighting.sunlight + cell.lighting.lighting))
+        if red > 255: red = 255
+        green = int(tile.color.g * (cell.lighting.sunlight + cell.lighting.lighting))
+        if green > 255: green = 255
+        blue = int(tile.color.b *(cell.lighting.sunlight + cell.lighting.lighting))
+        if blue>255: blue = 255
+        #print(red,green,blue, tile.color,globalX,globalY)
+
+
+        if tile.image == None:
             pygame.draw.rect(buffer,(red,green,blue),(localX*TILE_WIDTH,localY * TILE_HEIGHT,TILE_WIDTH,TILE_HEIGHT))
         else:
-            tile.tile.image.set_alpha(brightness)
+            tile.image.set_alpha(brightness)
             buffer.blit(self.lighting, (localX*TILE_WIDTH,localY * TILE_HEIGHT))
-            buffer.blit(tile.tile.image, (localX*TILE_WIDTH,localY * TILE_HEIGHT))
+            #print(brightness)
+            
+            buffer.blit(tile.image, (localX*TILE_WIDTH,localY * TILE_HEIGHT))
+            
+            #pygam
 
             #buffer.blits([(self.lighting, (localX*TILE_WIDTH,localY * TILE_HEIGHT)),   (tile.tile.image, (localX*TILE_WIDTH,localY * TILE_HEIGHT))            ])
 

@@ -51,7 +51,8 @@ def addContent():
 	air = Tile(0,0,220)
 	air.isSolid = False
 	air.bRange = 5
-	air.sunlight = 1
+	#air.sunlight = 2
+	air.sunlightEmissive=1
 	air.translucency = .1
 	air.rRange = 0
 	air.bRange = 0
@@ -71,15 +72,12 @@ def addContent():
 	dirt.tileID = 1
 	dirt.rRange = 5
 	dirt.bRange = 5
-	dirt.translucency = .7
+	dirt.translucency = .8
 	dirt.image = pygame.image.load("contentPacks/basegame/assets/dirt.bmp")
 	dirt.drops = "dirt"
 	
 	
-	dirtItem = itemManager["block"] #take generic block
-	dirtItem.places = "dirt" #configure it for dirt
-	dirtItem.icon = pygame.transform.scale(pygame.image.load("contentPacks/basegame/assets/dirt.bmp"), (20, 20))
-	itemManager["dirt"] = dirtItem #add new item back
+	itemManager.addFromTile(dirt,"contentPacks/basegame/assets/dirt.bmp")
 	
 	
 	
@@ -87,14 +85,54 @@ def addContent():
 	tileManager["dirt"] = dirt
 
 
+
+
+
+	
+	
+	
+	
+	grass = Tile(117 , 76 ,19)
+	grass.isSolid = True
+	grass.tileID = 1
+	grass.rRange = 5
+	grass.bRange = 5
+	grass.translucency = .7
+	grass.image = pygame.image.load("contentPacks/basegame/assets/grass.bmp")
+	grass.drops = "grass"
+	
+	
+	itemManager.addFromTile(grass,"contentPacks/basegame/assets/grass.bmp")
+	
+	#dirt.darkenImage()
+	tileManager["grass"] = grass
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	dirtBackground = Tile(50,30,9)
 	dirtBackground.isSolid = False
 	dirtBackground.tileID = 0
 	dirtBackground.rRange = 5
 	dirtBackground.bRange = 5
-	dirtBackground.translucency = .85
+	dirtBackground.translucency = .94
 
-	dirtBackground.image = pygame.image.load("contentPacks/basegame/assets/dirtbackground.bmp")
+	dirtBackground.image = pygame.image.load("contentPacks/basegame/assets/dirtbackground1.bmp")
 	#dirtBackground.darkenImage()
 	tileManager["dirtBackground"] = dirtBackground
 
@@ -106,6 +144,7 @@ def addContent():
 	stone.gRange =5
 	stone.bRange =5
 	stone.translucency = .9
+	stone.image = pygame.image.load("contentPacks/basegame/assets/stone.bmp")
 	tileManager["stone"] = stone
 
 
@@ -116,7 +155,7 @@ def addContent():
 	stoneBackground.gRange = 5
 	stoneBackground.bRange = 5
 	stoneBackground.translucency = .94
-
+	stoneBackground.image = pygame.image.load("contentPacks/basegame/assets/stonebackground.bmp")
 	tileManager["stoneBackground"] = stoneBackground
 	
 	
@@ -136,7 +175,7 @@ def addContent():
 	bedrock.rRange = 5
 	bedrock.gRange = 5
 	bedrock.bRange = 5
-	bedrock.translucency = .9
+	bedrock.translucency = 0
 	bedrock.unbreakable = True
 	bedrock.image = pygame.image.load("contentPacks/basegame/assets/bedrock.bmp")
 	tileManager["bedrock"] = bedrock

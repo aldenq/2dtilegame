@@ -21,8 +21,14 @@ class Actions:
         if not item.outOfRange:
             blockX,blockY = self.world.getBlock(x,y)
             tile = item.places
-            
-            if self.world[blockX,blockY].tile.tileName != tile and not self.world[blockX,blockY].tile.isSolid:
+            if not self.world[blockX,blockY].tile:
+                self.world[blockX,blockY].tile = self.tileManager[tile]
+                self.buffers.updateTile(blockX,blockY)
+                self.world.updateLighting(blockX,blockY,self.tileManager[tile])
+                item.count -= 1
+                
+            elif self.world[blockX,blockY].tile.tileName != tile and not self.world[blockX,blockY].tile.isSolid:
+
                 self.world[blockX,blockY].tile = self.tileManager[tile]
                 self.buffers.updateTile(blockX,blockY)
                 self.world.updateLighting(blockX,blockY,self.tileManager[tile])

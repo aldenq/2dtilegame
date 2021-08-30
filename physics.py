@@ -122,6 +122,8 @@ class Collider():
         for x in range(topLeftX,bottomRightX):
             for y in range(topLeftY,bottomRightY):
                 tile = world[x,y].tile
+                if not tile:
+                    continue
                 if not tile.isSolid:
                     continue
                 

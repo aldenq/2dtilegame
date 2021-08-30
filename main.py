@@ -321,15 +321,17 @@ def startGame():
         
         # #print(pygame.mouse.get_pos())
         # #screen.blit(buffers.buffers[0,0],(0,0))
-        
-        # gx,gy = mainPlayer.camera.getGlobal(mx,my)
-        # blockX,blockY = world.getBlock(gx,gy)
+        mx,my = pygame.mouse.get_pos()
+        gx,gy = mainPlayer.camera.getGlobal(mx,my)
+        blockX,blockY = world.getBlock(gx,gy)
         # #print(blockX,blockY)
-        # #print(world[blockX,blockY].lighting.passthroughs)
+        #print(world[blockX,blockY].tile.sunlight,world[blockX,blockY].tile.sunlightEmissive )
 
-
-        for i in range(30):
+        #total = 0
+        for i in range(40):
             lighting.UpdateFromQueue(buffers)
+        
+        #print(total)
 
 
 

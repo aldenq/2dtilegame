@@ -15,6 +15,8 @@ class Tile():
         self.lightLevel = 0
         self.sunlight = 0
         self.emissionlevel = 0
+
+        self.sunlightEmissive = 0
         self.translucency = .4
         self.colorTranslucency = None
         self.image = None
@@ -57,6 +59,7 @@ class TileManager():
         retTile.translucency = tile.translucency
         retTile.drops = tile.drops
         retTile.unbreakable = tile.unbreakable
+        retTile.sunlightEmissive = tile.sunlightEmissive
         #print(retTile.drops)
 
         #retTile.color.r = 
