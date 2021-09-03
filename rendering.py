@@ -1,10 +1,12 @@
 from helpers import *
 import pygame
+from pygame.locals import *
 from settings import *
 import math
 class Buffer():
     def __init__(self,width,height) -> None:
         self.buffer = pygame.Surface((width, height))
+
         pass
     
 
@@ -22,7 +24,7 @@ class BufferMatrix():
         
         
         """
-
+        flags = 0
         self.width = width
         self.height = height
         self.world=world
@@ -35,12 +37,13 @@ class BufferMatrix():
         self.bufferTileX = int(world.width/width) #tiles in a buffer
         self.bufferTileY = int(world.height/height)
 
-        self.lighting = pygame.Surface((TILE_WIDTH,TILE_HEIGHT))
+        self.lighting = pygame.Surface((TILE_WIDTH,TILE_HEIGHT),flags = flags)
         self.lighting.fill((0,0,0))
-
+        self.lighting.set_alpha(None)
         for x in range(width):
             for y in range(height):
-                self.buffers[x,y] = pygame.Surface((self.bufferWidth, self.bufferHeight))
+                self.buffers[x,y] = pygame.Surface((self.bufferWidth, self.bufferHeight),flags = flags)
+                self.buffers[x,y].set_alpha(None)
     
 
     def drawBuffer(self,x,y):
@@ -59,8 +62,8 @@ class BufferMatrix():
 
 
 
-        lighting = pygame.Surface((TILE_WIDTH,TILE_HEIGHT))
-        lighting.fill((0,0,0))
+        #lighting = pygame.Surface((TILE_WIDTH,TILE_HEIGHT))
+        #lighting.fill((0,0,0))
         for localX in range(self.bufferTileX):
             for localY in range(self.bufferTileY):
                 globalX = localX+offsetX
@@ -92,7 +95,7 @@ class BufferMatrix():
                     pygame.draw.rect(buffer,(red,green,blue),(localX*TILE_WIDTH,localY * TILE_HEIGHT,TILE_WIDTH,TILE_HEIGHT))
                 else:
                     tile.image.set_alpha(brightness)
-                    buffer.blit(lighting, (localX*TILE_WIDTH,localY * TILE_HEIGHT))
+                    buffer.blit(self.lighting, (localX*TILE_WIDTH,localY * TILE_HEIGHT))
                     #print(brightness)
                     
                     buffer.blit(tile.image, (localX*TILE_WIDTH,localY * TILE_HEIGHT))
@@ -183,6 +186,9 @@ class BufferMatrix():
         
         if brBufferX < 0: brBufferX = 0
         if brBufferY < 0: brBufferX = 0
+
+        if brBufferX > self.width-1: brBufferX = self.width-1
+        if brBufferY > self.height-1: brBufferY = self.height-1
         #print((tlBufferX,tlBufferY),(brBufferX,brBufferY))
 
         if not (camera.lastX == camera.x and camera.lastY == camera.y):

@@ -33,133 +33,7 @@ class Cell():
     
 
 
-
-class ray():
-    """
-    creates a ray that can be used to calculate volumetrics and lighting
     
-    """
-    speed = TILE_WIDTH/4
-    def __init__(self,originX,originY,angle,intensity,r,g,b,world) -> None:
-        self.color = (Color(r,g,b)/255)*intensity
-        
-        self.xspeed = math.cos(angle)*self.speed
-        self.yspeed = math.sin(angle)*self.speed
-
-
-        # testX = (self.xspeed * 100)//TILE_WIDTH
-        # if testX != 0:
-        #     testY = ((self.yspeed * 100)//TILE_HEIGHT)/testX
-        #     self.xspeed = TILE_WIDTH#*= self.speed
-        #     self.yspeed = testY
-        
-
-        # if abs(self.xspeed) > abs(self.yspeed):
-        #     self.speed = TILE_WIDTH/abs(self.xspeed) 
-        # else:
-        #     self.speed = TILE_WIDTH/abs(self.yspeed)
-        
-        #self.speed /= 2
-        
-        
-        #print(self.xspeed,self.yspeed,self.speed)
-        self.x,self.y = world.getPos(originX,originY)
-
-        self.x += TILE_WIDTH/2
-        self.y += TILE_HEIGHT/2
-
-        self.origin = (originX,originY)
-        self.intensity = intensity
-        self.world = world
-        self.lastTileX = 0
-        self.lastTileY = 0
-        self.tile = None
-
-
-    def step(self,count,buffers):
-        tileX,tileY = 0,0
-        #print("sim")
-        for i in range(count):
-            
-            #self.x += self.xspeed
-            #self.y += self.yspeed
-            tileX,tileY = self.world.getBlock(self.x,self.y)
-            
-            
-
-            #print(self.color,self.x,self.y)
-
-            
-            #print(tileX,tileY,"tile")
-
-            if self.x < 0 or self.x > WORLD_WIDTH*TILE_WIDTH:
-                #print("out of bounds x")
-                return(0)
-            if self.y < 0 or self.y > WORLD_HEIGHT*TILE_HEIGHT:
-                #print("out of bounds y")
-                return(0)
-
-            
-            #print("doing stuff")
-            self.tile = self.world[tileX,tileY]
-            
-            #self.color *= tile.tile.translucency
-            clone = copy.copy(self)
-            clone.color = copy.copy(self.color)
-
-            self.tile.lighting.passthroughs.append(clone)
-            self.lastTileX = tileX
-            self.lastTileY = tileY
-
-            while self.lastTileX == tileX and self.lastTileY == tileY:
-                #print("repeat")
-                self.color.r = self.color.r*(1-self.tile.tile.colorTranslucency.r)
-                self.color.g = self.color.g*(1-self.tile.tile.colorTranslucency.g)
-                self.color.b = self.color.b*(1-self.tile.tile.colorTranslucency.b)
-                #print(self.color,tile.tile.colorTranslucency, )
-                self.tile.lighting.lighting.r += self.color.r
-                self.tile.lighting.lighting.g += self.color.g
-                self.tile.lighting.lighting.b += self.color.b
-                self.x += self.xspeed
-                self.y += self.yspeed
-                tileX,tileY = self.world.getBlock(self.x,self.y)
-            
-            buffers.updateTile(self.lastTileX ,self.lastTileY )
-            
-
-            
-        #print("raying and tracing", self.x,self.y,self.xspeed,self.yspeed,self.intensity)
-        return(self.color.r + self.color.g + self.color.b)
-    #def reStep(self,count, buffers):
-
-
-
-
-
-
-
-        
-
-        #self.origin
-        pass
-    
-
-    
-    
-    
-class lightingWorkload():
-
-    def __init__(self,x,y,level,count,world):
-        self.x = x
-        self.y = y
-        self.level = level
-        self.radius = 0
-        self.rays = []
-
-
-        for i in range(count):
-            self.rays.append(   ray(x,y, (6.283/count) *i,level ,255,255,255,world   )        )
-
 class lightingWorkloadSunlight():
 
     def __init__(self,x,y,world):
@@ -188,23 +62,21 @@ class lightingWorkloadSunlight():
             if not tile:
                 tile = self.world[self.x,self.y].backgroundTile
 
+            prevLevel = self.world[self.x,self.y].lighting.sunlight
+
             self.level = self.world[self.x,self.y - 1].lighting.sunlight * tile.translucency  + tile.sunlightEmissive
             self.world[self.x,self.y].lighting.sunlight = self.level
+
             buffers.updateTile(self.x ,self.y)
             self.y +=1 
-            if self.level < LIGHTING_CUTOFF:
+
+            delta = self.level-prevLevel
+            if abs(delta) < LIGHTING_CUTOFF:
                 return(0)
             #print(self.level)
-        return(self.level)
+        return(1)
         #if self.level <= LIGHTING_CUTOFF:
             
-
-        
-
-
-
-
-
 
 
 class World():
@@ -276,7 +148,7 @@ class World():
                 
                 elif y < UNDERGROUND_END:   #code for underground
 
-                    if y < UNDERGROUND_END-2:
+                    if y < UNDERGROUND_END-120:
                         cell.backgroundTile = self.tileManager.fastCopy("air") 
                     else:
                         cell.backgroundTile = self.tileManager.fastCopy("dirtBackground") 
@@ -307,14 +179,14 @@ class World():
                 elif y < UNDERGROUND_END + 24: #transition period
                     block = random.randint(0,round(24/((y-UNDERGROUND_END)+1))  )
 
-                    if block == 0:
+                    # if block == 0:
                            
-                        cell.backgroundTile = self.tileManager.fastCopy("stoneBackground")
-                            #cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency + cell.tile.sunlightEmissive
+                    #     cell.backgroundTile = self.tileManager.fastCopy("stoneBackground")
+                    #         #cell.tile.sunlight = self.world[x,y-1].tile.sunlight *cell.tile.translucency + cell.tile.sunlightEmissive
 
-                    else:
+                    # else:
                             
-                        cell.backgroundTile = self.tileManager.fastCopy("dirtBackground")
+                    cell.backgroundTile = self.tileManager.fastCopy("dirtBackground")
 
 
                     if self.caveGen(x,y,caveSeed1,caveSeed2,.5 - (y-UNDERGROUND_END)*.025):
@@ -362,13 +234,6 @@ class World():
 
                     cell.lighting.sunlight = self.world[x,y-1].lighting.sunlight * tile.translucency + tile.sunlightEmissive
                 
-
-
-
-
-
-
-        #print("done")
 
 
     def __getitem__(self,loc):
@@ -437,7 +302,7 @@ class World():
             for i in range(len(lightingWorkload.rays)):
                 cray = lightingWorkload.rays[i-offset]
                 level = cray.step(1,buffers)
-                if level < LIGHTING_CUTOFF:
+                if not level:
                     #print("killing")
                     del lightingWorkload.rays[i-offset]
                     offset += 1
@@ -447,21 +312,8 @@ class World():
 
 
 
-
-
-
-
-
-        
-
-
-
-
-        
-        
         return(done)
-            
-        pass
+
 
     def workOnWorkloads(self,count,buffers):
         if len(self.lightingWorkloads) > 0:
@@ -485,26 +337,6 @@ class World():
         self.lightingInterface.sendEvent(x,y)
         workload = lightingWorkloadSunlight(x,y,self)
         self.lightingWorkloads.append(workload)
-
-
-
-
-        
-        # if tile.emissionlevel > 0:
-        #     workload = lightingWorkload(x,y,tile.emissionlevel,145,self)
-        #     self.lightingWorkloads.append(workload)
-        # else:
-        #     workload = lightingWorkload(x,y,0,0,self)
-        #     workload.rays = []
-        #     for i in self.world[x,y].lighting.passthroughs:
-        #         out = copy.copy(i)
-        #         out.color = copy.copy(i.color)
-        #         workload.rays.append(out)
-        #     #= copy.deepcopy(self.world[x,y].lighting.passthroughs)
-        #     #for i in workload.rays:
-        #     #    i = cop
-        #     self.lightingWorkloads.append(workload)
-        #     #print(self.lightingWorkloads[0].rays)
             
 
 

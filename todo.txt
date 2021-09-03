@@ -4,20 +4,38 @@ engine:
     general:
         add ability to get angle/slope between two tiles/points
         a bunch of things could in theory be threaded, thread them.
+        explosions
+
+
+        some sort of threaded world managment system
 
     inventory:
+        proper inventory that can be managed with mouse
+        crafting
         
 
     entities:
         add in ability to spawn clone of entity
+        natural spawning of entities
         
+    lighting:
+        handle delete light source <-
+        handle light source replaced with different light source
+        some slight issue with sunlight, to re-create cover pre-lit area
 
     world:
-        cells should have a distinct background and foreground tile
         structure generation
+        trees
+        save world
+        load world
+        populate caves with something interesting
+        fully portable worlds
+        rework world generator into something more expandable
 
-    lighting:
-        allow for region to be re ray-traced if a tile is updated
+
+
+
+    
         
 
 

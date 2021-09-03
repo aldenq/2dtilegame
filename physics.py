@@ -95,15 +95,6 @@ class Collider():
 
         
 
-
-
-        
-
-
-
-
-
-
     def draw(self,surface, camera):
         x,y = camera.getOnscreen(self.x,self.y)
         pygame.draw.rect(surface, (255,0,255), (x,y,self.width,self.height))

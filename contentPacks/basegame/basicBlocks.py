@@ -76,13 +76,13 @@ def addContent():
 	dirt.image = pygame.image.load("contentPacks/basegame/assets/dirt.bmp")
 	dirt.drops = "dirt"
 	
-	
+	tileManager["dirt"] = dirt
 	itemManager.addFromTile(dirt,"contentPacks/basegame/assets/dirt.bmp")
 	
 	
 	
 	#dirt.darkenImage()
-	tileManager["dirt"] = dirt
+	
 
 
 
@@ -102,10 +102,11 @@ def addContent():
 	grass.drops = "grass"
 	
 	
-	itemManager.addFromTile(grass,"contentPacks/basegame/assets/grass.bmp")
+	
 	
 	#dirt.darkenImage()
 	tileManager["grass"] = grass
+	itemManager.addFromTile(grass,"contentPacks/basegame/assets/grass.bmp")
 
 
 
@@ -130,7 +131,7 @@ def addContent():
 	dirtBackground.tileID = 0
 	dirtBackground.rRange = 5
 	dirtBackground.bRange = 5
-	dirtBackground.translucency = .94
+	dirtBackground.translucency = .90
 
 	dirtBackground.image = pygame.image.load("contentPacks/basegame/assets/dirtbackground1.bmp")
 	#dirtBackground.darkenImage()
@@ -146,6 +147,7 @@ def addContent():
 	stone.translucency = .9
 	stone.image = pygame.image.load("contentPacks/basegame/assets/stone.bmp")
 	tileManager["stone"] = stone
+	itemManager.addFromTile(stone,"contentPacks/basegame/assets/stone.bmp")
 
 
 	stoneBackground = Tile(50,30,9)
@@ -228,7 +230,7 @@ def addContent():
 	
 	
 	
-	
+			
 	
 	#bedrockItem = itemManager["block"] #take generic block
 	#bedrockItem.places = "bedrock" #configure it for dirt

@@ -7,6 +7,7 @@ import math
 import copy
 import queue
 import random
+import time
 """"
 File that contains everything to run a threaded ray marcher and general lighting system
 
@@ -226,11 +227,11 @@ class lightingCell:
 
 
 
-
+last = 0
 
 
 def lightingSystemStart(eventsQ: mp.Queue, updatesQ: mp.Queue, lightingMatrix: Matrix):
-    global rays
+    global rays,last
     #updates: x,y,lightLevel
     #events:  x,y,translucency,emissionlevel
     
@@ -243,8 +244,16 @@ def lightingSystemStart(eventsQ: mp.Queue, updatesQ: mp.Queue, lightingMatrix: M
             
 
     while True:
+        
+        
+
+
+
         try:
             event = eventsQ.get_nowait()
+
+
+            
             if event:
                 x,y,translucency,emissionlevel = event
                 cell = lightingMatrix[x,y]
@@ -291,7 +300,24 @@ def lightingSystemStart(eventsQ: mp.Queue, updatesQ: mp.Queue, lightingMatrix: M
                     pass
 
 
-                else: #if emiter is getting destroyed
+                else: #if emitter is getting destroyed
+                    lightingMatrix[x,y].translucency = translucency
+                    for speedloc in cell.rays:
+                        levelDelta,intensity = cell.rays[speedloc]
+                        #intensityDelta = translucencyDelta*intensity
+
+
+                        #print(intensityDelta, "int delta")
+                        
+                        ray= Ray(0,0, 0,0,lightingMatrix)
+                        ray.xspeed,ray.yspeed,x,y,origin = speedloc
+                        #print(ray.xspeed,ray.yspeed,"new")
+                        ray.x = x
+                        ray.y = y
+                        ray.origin = origin
+                        rays.append(ray)
+
+
                     pass
         except queue.Empty:
             pass
@@ -301,19 +327,49 @@ def lightingSystemStart(eventsQ: mp.Queue, updatesQ: mp.Queue, lightingMatrix: M
         lastX = None
         lastY = None
         lastLL = 0
+
+        # if (updatesQ.qsize() ) > last:
+        #     #print(updatesQ.qsize(),time.time())
+        #     last = updatesQ.qsize()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        """"
+        this is the section that actually simulates the rays. the ray marcher is primarily constrained by the main thread so in this sections most optimizations will be done
+        for it's sake
+        
+        """
+        blockUpdates = {}
         for i in range(len(rays)):
             ray = rays[i - offset]
             x,y,lightLevel,intensity,delta = ray.step()
+
+
+            blockUpdates[(x,y)] = lightLevel
             #updatesQ.put((x,y,lightLevel))
 
-            if lastX== x and lastY==y: #rays that are near each other in the rays list have a higher probability of being near each other in space
-                lastLL = lightLevel
-            else:
-                if lastX != None:
-                    updatesQ.put((lastX,lastY,lastLL))
-                lastLL = lightLevel
-                lastX = x
-                lastY = y
+            # if lastX== x and lastY==y: #rays that are near each other in the rays list have a higher probability of being near each other in space
+            #     lastLL = lightLevel
+            # else:
+            #     if lastX != None:
+            #         updatesQ.put((lastX,lastY,lastLL))
+            #     lastLL = lightLevel
+            #     lastX = x
+            #     lastY = y
 
                 
 
@@ -325,15 +381,17 @@ def lightingSystemStart(eventsQ: mp.Queue, updatesQ: mp.Queue, lightingMatrix: M
                 offset += 1
 
         if lastX != None:
-            updatesQ.put((lastX,lastY,lastLL))
+            #updatesQ.put((lastX,lastY,lastLL))
+            blockUpdates[(x,y)] = lightLevel
+        
+
+        for block in blockUpdates:
+            x,y = block
+            LL = blockUpdates[block]
+            updatesQ.put((x,y,LL))
+
         
             
-
-            
-
-
-
-
         pass
 
 
@@ -401,18 +459,33 @@ class LightingInterface():
     
 
     def UpdateFromQueue(self,buffers):
-        try:
-            data = self.updates.get_nowait()
-            if data:
+        lightLevel = 1
+        prev = 1
+        x,y = None,None
+        while ((prev > 1 and lightLevel > 1) or x == None): #no point updating a tile that is already at max brightness to being even more bright so record the values and move along
+            try:
+                data = self.updates.get_nowait()
+            
                 
                 x,y,lightLevel = data
                 #print("data",x,y,lightLevel)
-                self.world[x,y].lighting.lighting = lightLevel
-                buffers.updateTile(x,y)
-                return(1)
-        except queue.Empty:
-            return(0)
+                prev = self.world[x,y].lighting.lighting
+                self.world[x,y].lighting.lighting = lightLevel#self.world[x,y].backgroundTile.updates / 20
+
+
+                
+
+                # if prev > 1 and lightLevel > 1:
+                #     pass
+                # else:
+                    
+                #return(1)
+            except queue.Empty:
+                return(0)
             pass
+        if x != None:
+            self.world[x,y].backgroundTile.updates += 1
+            buffers.updateTile(x,y)
 
 
 

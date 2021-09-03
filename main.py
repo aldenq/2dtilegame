@@ -1,5 +1,4 @@
 
-from standardActions import Actions
 import pygame
 import pygame.freetype
 from pygame.locals import *
@@ -9,6 +8,7 @@ import math
 import time
 import random
 
+from standardActions import Actions
 
 from helpers import *
 from settings import *
@@ -26,10 +26,10 @@ import standardActions
 import lightingSystem
 screen_size = (SCREEN_WIDTH*SCALE, SCREEN_HEIGHT*SCALE)
  
-flags =   DOUBLEBUF
+flags =  0
 
 screen = pygame.display.set_mode(screen_size,flags)
-#screen.set_alpha(None)
+screen.set_alpha(None)
 tileManager = tiles.TileManager()
 
 world = World(WORLD_WIDTH,WORLD_HEIGHT,tileManager)
@@ -85,10 +85,11 @@ basictools.itemManager = itemManager
 basictools.addContent()
 
 import contentPacks.basegame.basicEntities as basicEntities
-
+#######################
+print("done loading packs")
 mainPlayer.tool = itemManager["pickaxe"]
 mainPlayer.tool.user = mainPlayer
-#######################
+
 
 
 
@@ -104,11 +105,12 @@ lighting = lightingSystem.LightingInterface(world)
 world.lightingInterface = lighting
 print(f"took: {time.time()-st}")
 print(f"drawing buffers")
-
+st = time.time()
 buffers.drawBuffers()
 
 
 print("done")
+print(f"took: {time.time()-st}")
 
 
 
@@ -146,16 +148,11 @@ print("done")
 
 
 
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-RED = (255, 0, 0)
- 
-print("init")
+print("starting")
 
 print(pygame.display.get_driver())
 pygame.display.set_caption("pygame Test")
  
-# clock is used to set a max fps
 clock = pygame.time.Clock()
  
 
@@ -309,7 +306,7 @@ def startGame():
          #print(1/(time.time()-st))
         # #st = time.time()
 
-        #print(frame/(time.time() - ast), 1/(time.time()-st)  )
+        # print(frame/(time.time() - ast), 1/(time.time()-st)  )
         # st = time.time()
         # for i in range(50):
         #     buffers.updateTile(0,0)
@@ -325,10 +322,12 @@ def startGame():
         gx,gy = mainPlayer.camera.getGlobal(mx,my)
         blockX,blockY = world.getBlock(gx,gy)
         # #print(blockX,blockY)
-        #print(world[blockX,blockY].tile.sunlight,world[blockX,blockY].tile.sunlightEmissive )
+        #print(world[blockX,blockY].backgroundTile.updates )
 
         #total = 0
         for i in range(40):
+            if lighting.updates.empty():
+                break
             lighting.UpdateFromQueue(buffers)
         
         #print(total)
@@ -360,6 +359,8 @@ def startGame():
             
             
         #     #mainPlayer.collider.draw(screen,mainPlayer.camera)
+
+
         pygame.display.flip()
         #print(time.time()-st2)
 
